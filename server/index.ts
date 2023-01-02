@@ -22,7 +22,6 @@ io.on("connection", (socket: Socket) => {
 
     socket.on("ping", () => {
         socket.emit("pong");
-        console.log("pong");
     });
 
     socket.on("disconnect", () => {

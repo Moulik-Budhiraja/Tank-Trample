@@ -18,15 +18,18 @@ export function Home() {
         socket.on("connected", (data: connectionConfirmation) => {
             setSocketId(data.id);
 
-            connectionTime = Date.now();
+            setInterval(() => {
+                connectionTime = Date.now();
+    
+                // Send a ping
+                socket.emit("ping");
+    
+                // Record the time delta of the pong
+                socket.on("pong", () => {
+                    setPing(Date.now() - connectionTime);
+                });
+            }, 3000);
 
-            // Send a ping
-            socket.emit("ping");
-
-            // Record the time delta of the pong
-            socket.on("pong", () => {
-                setPing(Date.now() - connectionTime);
-            });
         });
         
 
