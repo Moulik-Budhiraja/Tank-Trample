@@ -1,6 +1,6 @@
-import { Socket } from "socket.io-client";
 
-export function Play(socket: any) {
+
+export function Play() {
     return (
         <>
         <h1>Play</h1>

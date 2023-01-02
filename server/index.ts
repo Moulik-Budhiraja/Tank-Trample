@@ -12,13 +12,18 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
     cors: {
-        origin: "*", // TODO change to specific in prod
+        origin: "http://localhost:3000", // TODO change to tank-trample.budhiraja.ca in prod
         methods: ["GET", "POST"],
     },
 });
 
 io.on("connection", (socket: Socket) => {
-    console.log(`user connected: ${socket.id}`);
+    socket.emit("connected", { id: socket.id });
+
+    socket.on("ping", () => {
+        socket.emit("pong");
+        console.log("pong");
+    });
 
     socket.on("disconnect", () => {
         console.log(`user disconnected: ${socket.id}`);
