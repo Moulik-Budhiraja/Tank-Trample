@@ -1,3 +1,4 @@
+import { time } from 'console';
 import { useEffect, useState } from 'react'
 import { socket } from '../service/socket'
 
@@ -18,6 +19,7 @@ export function Home() {
         socket.on("connected", (data: connectionConfirmation) => {
             setSocketId(data.id);
 
+
             setInterval(() => {
                 connectionTime = Date.now();
     
@@ -28,7 +30,7 @@ export function Home() {
                 socket.on("pong", () => {
                     setPing(Date.now() - connectionTime);
                 });
-            }, 3000);
+            }, 1000);
 
         });
         

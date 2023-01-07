@@ -1,4 +1,6 @@
 import { Socket } from "socket.io";
+import { Game } from "./components/game";
+import { Player } from "./components/player";
 
 const express = require("express");
 const app = express();
@@ -18,6 +20,10 @@ const io = new Server(server, {
 });
 
 io.on("connection", (socket: Socket) => {
+    let player = new Player(socket);
+
+    player.initializeEvents();
+
     socket.emit("connected", { id: socket.id });
 
     socket.on("ping", () => {
