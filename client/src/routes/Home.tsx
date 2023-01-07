@@ -1,48 +1,52 @@
 import { time } from 'console';
-import { useEffect, useState } from 'react'
-import { socket } from '../service/socket'
-
-type connectionConfirmation = {
-    id: number
-}
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { socket } from '../service/socket';
+import styled from 'styled-components';
+import { GameValidation } from '../types/gameTypes';
+import { InvalidGameCode } from '../components/errorMessages';
 
 export function Home() {
-    const [socketId, setSocketId] = useState(Number);
-    const [ping, setPing] = useState(Number);
+  const [gameCode, setGameCode] = useState(String);
+  const [gameCodeError, setGameCodeError] = useState(false);
 
+  const navigate = useNavigate();
 
+  function handleCodeChange(event: React.ChangeEvent<HTMLInputElement>) {
+    event.currentTarget.value = event.currentTarget.value.toUpperCase();
 
-    useEffect(() => {
-        let connectionTime: number = 0;
+    setGameCode(event.currentTarget.value);
+  }
 
-        // When connected to the server
-        socket.on("connected", (data: connectionConfirmation) => {
-            setSocketId(data.id);
+  function joinLobby() {
+    socket.emit('validate-game-code', { gameCode: gameCode });
 
-
-            setInterval(() => {
-                connectionTime = Date.now();
-    
-                // Send a ping
-                socket.emit("ping");
-    
-                // Record the time delta of the pong
-                socket.on("pong", () => {
-                    setPing(Date.now() - connectionTime);
-                });
-            }, 1000);
-
-        });
-        
-
+    socket.on('game-code-valid', (data: GameValidation) => {
+      if (data.valid) {
+        navigate(`/lobby/?gameCode=${data.gameCode}`);
+      } else {
+        setGameCodeError(true);
+      }
     });
+  }
 
-    return (
-        <>
-        <h1>Home</h1>
-            <p>This is the home page</p>
-            <p>Connected to server with socket id: {socketId} </p>
-            <p>Ping: { ping }</p>
-        </>
-    )
+  function createLobby() {
+    socket.emit('create-game');
+    socket.on('game-created', (data: GameValidation) => {
+      navigate(`/lobby/?gameCode=${data.gameCode}`);
+    });
+  }
+
+  return (
+    <>
+      <h1>Tank Trample</h1>
+      <p>Welcome to Tank Trample!</p>
+      <input onChange={handleCodeChange} type="text" placeholder="Game Code" />
+      <button onClick={joinLobby}>Join Lobby</button>
+      <InvalidGameCode gameCodeError={gameCodeError}></InvalidGameCode>
+      <br />
+      <br />
+      <button onClick={createLobby}>Create New Lobby</button>
+    </>
+  );
 }
