@@ -21,6 +21,9 @@ const io = new Server(server, {
     }
 });
 
+// Pass the socket.io instance to the game class
+Game.io = io;
+
 // Sets up listeners for all game events
 io.on('connection', (socket: Socket) => {
     let player = new Player(socket);
@@ -30,6 +33,7 @@ io.on('connection', (socket: Socket) => {
 
     socket.on('disconnect', () => {
         console.log(`user disconnected: ${socket.id}`);
+        player.handleDisconnect();
     });
 });
 

@@ -12,9 +12,12 @@ type GameValidation = {
 /**
  * Represents a game that is being played
  * by multiple players
+ *
+ * @param io The socket.io instance
  */
 export class Game {
     static games: Game[] = [];
+    static io: any;
     gameCode: string;
     playerList: Player[] = [];
 
@@ -57,6 +60,15 @@ export class Game {
     }
 
     /**
+     * Removes a player from the game
+     *
+     * @param player The player to remove from the game
+     */
+    removePlayer(player: Player) {
+        this.playerList = this.playerList.filter((p) => p.id !== player.id);
+    }
+
+    /**
      * Checks if the game's player list contains a player
      *
      * @param player The player to check if the game's player list contains
@@ -88,11 +100,12 @@ export class Game {
      */
     updatePlayerList() {
         if (this.playerList.length > 0) {
-            this.playerList[0].socket.to(this.gameCode).emit('player-list', {
+            Game.io.to(this.gameCode).emit('player-list', {
                 players: this.getCondensedPlayerList()
             });
 
             console.log('updated player list');
+            console.table(this.getCondensedPlayerList());
         }
     }
 
@@ -165,13 +178,12 @@ export class Game {
             console.log(`user ${player.id} joined game ${data.gameCode}`);
             console.table(game?.getCondensedPlayerList());
 
+            // Join the game's socket room
             player.socket.join(data.gameCode);
 
-            player.socket.to(player.gameCode).emit('player-list', {
-                players: Game.getGameByCode(
-                    player.gameCode
-                )?.getCondensedPlayerList()
-            });
+            // Set name also updates the player list
+            player.setName(`Player ${game?.playerList.length}`);
+            player.sendName();
         });
     }
 }

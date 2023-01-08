@@ -7,3 +7,7 @@ export interface Player {
 export type PlayerList = {
   players: Player[];
 };
+
+export type Name = {
+  name: string;
+};

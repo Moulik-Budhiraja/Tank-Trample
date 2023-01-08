@@ -40,10 +40,18 @@ export class Player {
      */
     initializeEvents() {
         this.socket.on('set-name', (data: Name) => {
-            this.name = data.name;
-            console.log(`user ${this.id} set name to ${this.name}`);
-            Game.getGameByCode(this.gameCode)?.updatePlayerList();
+            this.setName(data.name);
+            this.sendName();
         });
+    }
+
+    /**
+     * Handles the player disconnecting
+     * - Removes the player from the game
+     */
+    handleDisconnect() {
+        Game.getGameByCode(this.gameCode)?.removePlayer(this);
+        Game.getGameByCode(this.gameCode)?.updatePlayerList();
     }
 
     /**
@@ -53,6 +61,25 @@ export class Player {
      */
     setGameCode(gameCode: string) {
         this.gameCode = gameCode;
+    }
+
+    /**
+     * Sets the name of the player and updates the player list
+     *
+     * @param name The name of the player
+     */
+    setName(name: string) {
+        this.name = name;
+        Game.getGameByCode(this.gameCode)?.updatePlayerList();
+    }
+
+    /**
+     * Sends the current name of the player to the client
+     */
+    sendName() {
+        this.socket.emit('current-name', {
+            name: this.name
+        });
     }
 
     /**

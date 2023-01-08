@@ -5,6 +5,7 @@ import { GameValidation } from '../types/gameTypes';
 import { InvalidGameCode } from '../components/errorMessages';
 import { Player, PlayerList } from '../types/playerTypes';
 import { GenericPlayerList } from '../components/playerLists';
+import { Name } from '../types/playerTypes';
 
 /**
  * Renders the Lobby page.
@@ -18,6 +19,8 @@ export function Lobby() {
   const [gameCodeError, setGameCodeError] = useState(false);
 
   const [players, setPlayers] = useState([] as Player[]);
+  
+  const [myName, setMyName] = useState(String);
 
   useEffect(() => {
     setGameCode(searchParams.get('gameCode') || '');
@@ -42,9 +45,13 @@ export function Lobby() {
 
     socket.on('player-list', (data: PlayerList) => {
       setPlayers(data.players);
-      console.log(data.players);
     });
-  });
+
+    socket.on('current-name', (data: Name) => {
+      setMyName(data.name);
+    })
+
+  }, [searchParams.get(gameCode)]);
 
   function updateInputName(event: React.ChangeEvent<HTMLInputElement>) {
     setName(event.currentTarget.value);
@@ -52,21 +59,30 @@ export function Lobby() {
 
   function updateName() {
     socket.emit('set-name', { name: name });
+    let input: HTMLInputElement = document.getElementById('setName') as HTMLInputElement;
+    input!.value = '';
+
   }
 
   return (
     <>
-      <h1>Lobby</h1>
-      <p>Game Code: {gameCode}</p>
+      <h1 style={{textAlign: 'center'}}>Lobby</h1>
+
       <div
         style={{
           display: 'flex',
           flexDirection: 'row',
-          justifyContent: 'space-between'
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: '40px',
+          height: '60vh'
         }}
       >
         <div>
+          <p>Game Code: {gameCode}</p>
+          <p>Current Name: {myName}</p>
           <input
+            id='setName'
             onChange={updateInputName}
             type="text"
             placeholder="Set Name"

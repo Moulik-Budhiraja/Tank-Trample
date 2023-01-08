@@ -12,15 +12,27 @@ type genericPlayerListProps = {
 export function GenericPlayerList({ players }: genericPlayerListProps) {
   return (
     <>
-      <div>
-        {players.map((player) => {
-          return (
-            <div key={player.id}>
-              <p>{player.name}</p>
-            </div>
-          );
-        })}
+      <div style={{
+        textAlign: 'left',
+        minWidth: '200px',
+        }}>
+        <h3 style={{textAlign: 'center'}}>Players</h3>
+        <ul style={
+          {
+            listStyleType: 'none',
+            maxHeight: '50vh',
+            overflowY: 'scroll',
+          }
+        }>
+          {players.map((player) => {
+            return (
+                <li key={player.id}>{player.name}</li>
+            );
+          })}
+        </ul>
       </div>
     </>
   );
 }
+
+// http://localhost:3000/lobby/?gameCode=USHKYD
