@@ -1,3 +1,8 @@
+/**
+ * Represents a node in a maze
+ *
+ * @param id The id of the node
+ */
 class Node {
     id: number;
     neighbours: Node[];
@@ -9,10 +14,15 @@ class Node {
     }
 }
 
+/**
+ * Represents the Map as a 2D array of Nodes
+ * An edge between two nodes indicates there is no wall between them
+ *
+ * @param length The length of the map
+ * @param width The width of the map
+ * @param openness The percentage of nodes that should be connected to other nodes
+ */
 export class Map {
-    // Represents the Map as a 2D array of Nodes
-    // An edge between two nodes indicates there is no wall between them
-
     height: number;
     width: number;
     nodes: Node[][];
@@ -116,6 +126,12 @@ export class Map {
         }
     }
 
+    /**
+     * Generates an SVG representation of the map
+     *
+     * @param scale The size of each node in the SVG
+     * @returns SVG an SVG representation of the map as a string
+     */
     generateSVG(scale: number = 100) {
         let data = '';
         data += `<svg width="${this.width * scale}" height="${

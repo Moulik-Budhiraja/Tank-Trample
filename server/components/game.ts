@@ -1,11 +1,18 @@
 import { Socket } from 'socket.io';
 import { Player, CondensedPlayer } from './player';
 
+/**
+ * Represents the game code that the player is trying to join
+ */
 type GameValidation = {
     gameCode: string;
     valid: boolean;
 };
 
+/**
+ * Represents a game that is being played
+ * by multiple players
+ */
 export class Game {
     static games: Game[] = [];
     gameCode: string;
@@ -17,6 +24,11 @@ export class Game {
         Game.games.push(this);
     }
 
+    /**
+     * Generates a unique random 6 character game code
+     *
+     * @returns The generated game code
+     */
     generateGameCode(): string {
         let result = '';
         const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -35,10 +47,21 @@ export class Game {
         return result;
     }
 
+    /**
+     * Adds a player to the game
+     *
+     * @param player The player to add to the game
+     */
     addPlayer(player: Player) {
         this.playerList.push(player);
     }
 
+    /**
+     * Checks if the game's player list contains a player
+     *
+     * @param player The player to check if the game's player list contains
+     * @returns Whether or not the game's player list contains the player
+     */
     hasPlayer(player: Player): boolean {
         for (let p of this.playerList) {
             if (p.id === player.id) {
@@ -49,10 +72,20 @@ export class Game {
         return false;
     }
 
+    /**
+     * Gets a list of condensed players
+     *
+     * @returns A list of condensed players
+     * @see Player.getCondensed()
+     */
     getCondensedPlayerList(): CondensedPlayer[] {
         return this.playerList.map((player) => player.getCondensed());
     }
 
+    /**
+     * Sends a socket message to all the players in the game
+     * to update their player list
+     */
     updatePlayerList() {
         if (this.playerList.length > 0) {
             this.playerList[0].socket.to(this.gameCode).emit('player-list', {
@@ -63,6 +96,14 @@ export class Game {
         }
     }
 
+    /**
+     * Checks if a game code is already taken
+     * by another game
+     *
+     * @param gameCode The game code to check if it is taken
+     * @returns Whether or not the game code is taken
+     * @see Game.getGameByCode
+     */
     static isGameCodeTaken(gameCode: string): boolean {
         for (let game of Game.games) {
             if (game.gameCode === gameCode) {
@@ -73,6 +114,12 @@ export class Game {
         return false;
     }
 
+    /**
+     * Gets a game by its game code
+     *
+     * @param gameCode The game code to get the game by
+     * @returns The game with the game code
+     */
     static getGameByCode(gameCode: string): Game | undefined {
         for (let game of Game.games) {
             if (game.gameCode === gameCode) {
@@ -83,6 +130,11 @@ export class Game {
         return undefined;
     }
 
+    /**
+     * Sets up all game related events for a player
+     *
+     * @param player The player to set up the events for
+     */
     static initializePlayerEvents(player: Player) {
         player.socket.on('validate-game-code', (data: GameValidation) => {
             player.socket.emit('game-code-valid', {

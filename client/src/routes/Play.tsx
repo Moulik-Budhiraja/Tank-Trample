@@ -1,3 +1,6 @@
+/**
+ * Renders the play page.
+ */
 export function Play() {
   return (
     <>

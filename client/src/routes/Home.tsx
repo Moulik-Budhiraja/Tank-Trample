@@ -6,6 +6,9 @@ import styled from 'styled-components';
 import { GameValidation } from '../types/gameTypes';
 import { InvalidGameCode } from '../components/errorMessages';
 
+/**
+ * Renders the Home page.
+ */
 export function Home() {
   const [gameCode, setGameCode] = useState(String);
   const [gameCodeError, setGameCodeError] = useState(false);

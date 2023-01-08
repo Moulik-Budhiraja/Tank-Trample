@@ -6,6 +6,9 @@ import { InvalidGameCode } from '../components/errorMessages';
 import { Player, PlayerList } from '../types/playerTypes';
 import { GenericPlayerList } from '../components/playerLists';
 
+/**
+ * Renders the Lobby page.
+ */
 export function Lobby() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
