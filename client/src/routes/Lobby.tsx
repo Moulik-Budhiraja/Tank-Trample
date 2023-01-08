@@ -57,7 +57,11 @@ export function Lobby() {
     setName(event.currentTarget.value);
   }
 
-  function updateName() {
+  function updateName(event: React.KeyboardEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement, MouseEvent>) {
+    if (event.type === 'keydown' && ((event as React.KeyboardEvent).key !== 'Enter')) {
+      return;
+    }
+
     socket.emit('set-name', { name: name });
     let input: HTMLInputElement = document.getElementById('setName') as HTMLInputElement;
     input!.value = '';
@@ -84,6 +88,7 @@ export function Lobby() {
           <input
             id='setName'
             onChange={updateInputName}
+            onKeyDown={updateName}
             type="text"
             placeholder="Set Name"
           />
