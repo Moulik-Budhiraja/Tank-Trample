@@ -20,17 +20,27 @@ class Node {
  *
  * @param length The length of the map
  * @param width The width of the map
- * @param openness The percentage of nodes that should be connected to other nodes
+ * @param scale The scale of the map, side length of one square in pixels
  */
 export class Map {
     height: number;
     width: number;
+    scale: number;
     nodes: Node[][];
 
-    constructor(length: number, width: number, openness: number = 0) {
+    constructor(length: number, width: number, scale: number = 100) {
         this.height = length;
         this.width = width;
+        this.scale = scale;
+        this.nodes = [];
+    }
 
+    /**
+     * Creates an empty graph with length * width nodes
+     * Stores those nodes in a length by width 2D array
+     * Sets adjacent nodes as neighbours
+     */
+    populateNodes() {
         this.nodes = [];
         for (let i = 0; i < this.height; i++) {
             let row = [];
@@ -57,11 +67,17 @@ export class Map {
                 }
             }
         }
+    }
 
+    /**
+     * Generates a maze from an empty maze using the randomized Prim's algorithm
+     * Creates a minimum spanning tree, meaning all nodes are accessible
+     */
+    generateMaze() {
         let node =
-            this.nodes[Math.floor(Math.random() * this.height)][
-                Math.floor(Math.random() * this.width)
-            ];
+        this.nodes[Math.floor(Math.random() * this.height)][
+            Math.floor(Math.random() * this.width)
+        ];
         let border: Node[] = [];
         let inside: Node[] = [node];
 
@@ -96,7 +112,14 @@ export class Map {
                 }
             }
         }
+    }
 
+    /**
+     * Randomly removes walls from the maze based specified openness
+     * 
+     * @param openness A number between 0 to 1, with 0 making no changes and 1 being an empty box
+     */
+    removeWalls(openness: number) {
         let maxEdges = this.height * this.width * 2 - this.height - this.width;
         let edges = this.height * this.width - 1;
         let toAdd = Math.floor((maxEdges - edges) * openness);
@@ -129,38 +152,37 @@ export class Map {
     /**
      * Generates an SVG representation of the map
      *
-     * @param scale The size of each node in the SVG
      * @returns SVG an SVG representation of the map as a string
      */
-    generateSVG(scale: number = 100) {
+    generateSVG() {
         let data = '';
-        data += `<svg width="${this.width * scale}" height="${
-            this.height * scale
+        data += `<svg width="${this.width * this.scale}" height="${
+            this.height * this.scale
         }">`;
         for (let i = 0; i < this.height; i++) {
             for (let j = 0; j < this.width; j++) {
                 let node = this.nodes[i][j];
-                let x = j * scale;
-                let y = i * scale;
+                let x = j * this.scale;
+                let y = i * this.scale;
                 if (!node.connected.includes(this.nodes[i - 1]?.[j])) {
                     data += `<line x1="${x}" y1="${y}" x2="${
-                        x + scale
+                        x + this.scale
                     }" y2="${y}" stroke="black" stroke-width="2" />`;
                 }
                 if (!node.connected.includes(this.nodes[i + 1]?.[j])) {
-                    data += `<line x1="${x}" y1="${y + scale}" x2="${
-                        x + scale
-                    }" y2="${y + scale}" stroke="black" stroke-width="2" />`;
+                    data += `<line x1="${x}" y1="${y + this.scale}" x2="${
+                        x + this.scale
+                    }" y2="${y + this.scale}" stroke="black" stroke-width="2" />`;
                 }
                 if (!node.connected.includes(this.nodes[i]?.[j - 1])) {
                     data += `<line x1="${x}" y1="${y}" x2="${x}" y2="${
-                        y + scale
+                        y + this.scale
                     }" stroke="black" stroke-width="2" />`;
                 }
                 if (!node.connected.includes(this.nodes[i]?.[j + 1])) {
-                    data += `<line x1="${x + scale}" y1="${y}" x2="${
-                        x + scale
-                    }" y2="${y + scale}" stroke="black" stroke-width="2" />`;
+                    data += `<line x1="${x + this.scale}" y1="${y}" x2="${
+                        x + this.scale
+                    }" y2="${y + this.scale}" stroke="black" stroke-width="2" />`;
                 }
             }
         }
