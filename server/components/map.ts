@@ -33,6 +33,9 @@ export class Map {
         this.width = width;
         this.scale = scale;
         this.nodes = [];
+
+        this.populateNodes();
+        this.generateMaze();
     }
 
     /**
@@ -75,9 +78,9 @@ export class Map {
      */
     generateMaze() {
         let node =
-        this.nodes[Math.floor(Math.random() * this.height)][
-            Math.floor(Math.random() * this.width)
-        ];
+            this.nodes[Math.floor(Math.random() * this.height)][
+                Math.floor(Math.random() * this.width)
+            ];
         let border: Node[] = [];
         let inside: Node[] = [node];
 
@@ -116,7 +119,7 @@ export class Map {
 
     /**
      * Randomly removes walls from the maze based specified openness
-     * 
+     *
      * @param openness A number between 0 to 1, with 0 making no changes and 1 being an empty box
      */
     removeWalls(openness: number) {
@@ -172,7 +175,9 @@ export class Map {
                 if (!node.connected.includes(this.nodes[i + 1]?.[j])) {
                     data += `<line x1="${x}" y1="${y + this.scale}" x2="${
                         x + this.scale
-                    }" y2="${y + this.scale}" stroke="black" stroke-width="2" />`;
+                    }" y2="${
+                        y + this.scale
+                    }" stroke="black" stroke-width="2" />`;
                 }
                 if (!node.connected.includes(this.nodes[i]?.[j - 1])) {
                     data += `<line x1="${x}" y1="${y}" x2="${x}" y2="${
@@ -182,7 +187,9 @@ export class Map {
                 if (!node.connected.includes(this.nodes[i]?.[j + 1])) {
                     data += `<line x1="${x + this.scale}" y1="${y}" x2="${
                         x + this.scale
-                    }" y2="${y + this.scale}" stroke="black" stroke-width="2" />`;
+                    }" y2="${
+                        y + this.scale
+                    }" stroke="black" stroke-width="2" />`;
                 }
             }
         }
@@ -190,3 +197,6 @@ export class Map {
         return data;
     }
 }
+
+let map = new Map(10, 10, 50);
+console.log(map.generateSVG());
