@@ -31,6 +31,10 @@ const io = new Server(server, {
     }
 });
 
+console.log(
+    local ? 'http://localhost:3000' : 'https://tank-trample.budhiraja.ca'
+);
+
 // Pass the socket.io instance to the game class
 Game.io = io;
 
