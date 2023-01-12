@@ -14,9 +14,19 @@ app.use(cors());
 
 const server = http.createServer(app);
 
+let local = false;
+
+process.argv.forEach((arg) => {
+    if (arg === 'local') {
+        local = true;
+    }
+});
+
 const io = new Server(server, {
     cors: {
-        origin: 'http://localhost:3000', // TODO change to tank-trample.budhiraja.ca in prod
+        origin: local
+            ? 'http://localhost:3000'
+            : 'https://tank-trample.budhiraja.ca',
         methods: ['GET', 'POST']
     }
 });

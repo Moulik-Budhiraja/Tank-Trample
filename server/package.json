@@ -4,7 +4,7 @@
   "description": "Idk",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon index.ts"
+    "start": "nodemon index.ts local"
   },
   "author": "",
   "license": "MIT",
