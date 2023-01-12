@@ -4,7 +4,8 @@
   "description": "Idk",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon index.ts"
+    "start": "nodemon index.ts",
+    "docker-start": "docker build -t tank-trample-server . && docker run -p 3001:3001 tank-trample-server"
   },
   "author": "",
   "license": "MIT",

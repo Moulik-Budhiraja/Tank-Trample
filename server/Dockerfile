@@ -3,18 +3,15 @@ FROM node:16-alpine
 WORKDIR /app
 
 
-RUN npm config set unsafe-perm true
+COPY . .
 
-RUN npm install -g typescript
-RUN npm install -g ts-node
+RUN npm i -g typescript
 
-USER node
+RUN npm i
 
-COPY --chown=node:node . .
-
-RUN npm install
+RUN tsc index.ts
 
 
 EXPOSE 3001
 # Start the app
-CMD [ "npx", "nodemon", "index.ts" ]
+CMD [ "node", "index.js" ]

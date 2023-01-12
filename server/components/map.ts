@@ -197,6 +197,3 @@ export class Map {
         return data;
     }
 }
-
-let map = new Map(10, 10, 50);
-console.log(map.generateSVG());
