@@ -1,6 +1,6 @@
 version: "3.3"
 services:
-  
+   
   tank-trample-client:
     build:
       context: .
