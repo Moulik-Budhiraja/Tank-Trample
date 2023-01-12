@@ -5,6 +5,7 @@ import { GameValidation } from '../../../server/common/types/gameTypes';
 import { InvalidGameCode } from '../components/errorMessages';
 import { GenericPlayerList } from '../components/playerLists';
 import { Name, CondensedPlayer, CondensedPlayerList } from '../../../server/common/types/playerTypes';
+import { PingTracker } from '../components/pingTracker';
 
 /**
  * Renders the Lobby page.
@@ -96,6 +97,9 @@ export function Lobby() {
         </div>
         <GenericPlayerList players={players}></GenericPlayerList>
       </div>
+
+      <br />
+      <PingTracker></PingTracker>
     </>
   );
 }

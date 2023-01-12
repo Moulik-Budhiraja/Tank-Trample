@@ -2,6 +2,7 @@ import { Socket } from 'socket.io';
 import { Player } from './player';
 import { CondensedPlayer } from '../types/playerTypes';
 import { GameValidation } from '../types/gameTypes';
+import { Ping } from '../types/networkComponents';
 
 /**
  * Represents a game that is being played
@@ -178,6 +179,11 @@ export class Game {
             // Set name also updates the player list
             player.setName(`Player ${game?.playerList.length}`);
             player.sendName();
+        });
+
+        player.socket.on('ping', (data: Ping) => {
+            data.timeReceived = Date.now();
+            player.socket.emit('pong', data);
         });
     }
 }
