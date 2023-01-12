@@ -78,9 +78,9 @@ export class Map {
      */
     generateMaze() {
         let node =
-        this.nodes[Math.floor(Math.random() * this.height)][
-            Math.floor(Math.random() * this.width)
-        ];
+            this.nodes[Math.floor(Math.random() * this.height)][
+                Math.floor(Math.random() * this.width)
+            ];
         let border: Node[] = [];
         let inside: Node[] = [node];
 
@@ -119,7 +119,7 @@ export class Map {
 
     /**
      * Randomly removes walls from the maze based specified openness
-     * 
+     *
      * @param openness A number between 0 to 1, with 0 making no changes and 1 being an empty box
      */
     removeWalls(openness: number) {
