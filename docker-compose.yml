@@ -1,4 +1,4 @@
-version: "3.4"
+version: "3.3"
 services:
   
   # Client Version: 0.0.3 
@@ -9,6 +9,10 @@ services:
     ports:
       - "3000:3000"
 
+    pull_policy: build
+    restart: always
+
+
   # Server Version: 0.0.2
   tank-trample-server:
     build:
@@ -16,3 +20,6 @@ services:
       dockerfile: server/Dockerfile
     ports:
       - "3001:3001"
+
+    pull_policy: build
+    restart: always
