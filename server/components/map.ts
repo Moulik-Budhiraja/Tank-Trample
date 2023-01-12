@@ -33,6 +33,9 @@ export class Map {
         this.width = width;
         this.scale = scale;
         this.nodes = [];
+
+        this.populateNodes();
+        this.generateMaze();
     }
 
     /**
@@ -159,34 +162,42 @@ export class Map {
         data += `<svg width="${this.width * this.scale}" height="${
             this.height * this.scale
         }">`;
+        data += "<path fill='none' stroke='black' stroke-width='2' d='"
+
+        // draw the border
+        data += `M0 0 L${this.width * this.scale} 0 `;
+        data += `L${this.width * this.scale} ${this.height * this.scale} `;
+        data += `L0 ${this.height * this.scale} `;
+        data += `L0 0 `;
+
+        // use paths to draw the walls
         for (let i = 0; i < this.height; i++) {
             for (let j = 0; j < this.width; j++) {
                 let node = this.nodes[i][j];
-                let x = j * this.scale;
-                let y = i * this.scale;
                 if (!node.connected.includes(this.nodes[i - 1]?.[j])) {
-                    data += `<line x1="${x}" y1="${y}" x2="${
-                        x + this.scale
-                    }" y2="${y}" stroke="black" stroke-width="2" />`;
-                }
-                if (!node.connected.includes(this.nodes[i + 1]?.[j])) {
-                    data += `<line x1="${x}" y1="${y + this.scale}" x2="${
-                        x + this.scale
-                    }" y2="${y + this.scale}" stroke="black" stroke-width="2" />`;
+                    // draw north wall
+                    data += `M${j * this.scale} ${i * this.scale} `;
+                    data += `L${(j + 1) * this.scale} ${i * this.scale} `;
                 }
                 if (!node.connected.includes(this.nodes[i]?.[j - 1])) {
-                    data += `<line x1="${x}" y1="${y}" x2="${x}" y2="${
-                        y + this.scale
-                    }" stroke="black" stroke-width="2" />`;
+                    // draw west wall
+                    data += `M${j * this.scale} ${i * this.scale} `;
+                    data += `L${j * this.scale} ${(i + 1) * this.scale} `;
+                }
+                if (!node.connected.includes(this.nodes[i + 1]?.[j])) {
+                    // draw south wall
+                    data += `M${j * this.scale} ${(i + 1) * this.scale} `;
+                    data += `L${(j + 1) * this.scale} ${(i + 1) * this.scale} `;
                 }
                 if (!node.connected.includes(this.nodes[i]?.[j + 1])) {
-                    data += `<line x1="${x + this.scale}" y1="${y}" x2="${
-                        x + this.scale
-                    }" y2="${y + this.scale}" stroke="black" stroke-width="2" />`;
+                    // draw east wall
+                    data += `M${(j + 1) * this.scale} ${i * this.scale} `;
+                    data += `L${(j + 1) * this.scale} ${(i + 1) * this.scale} `;
                 }
             }
         }
-        data += '</svg>';
+
+        data += "' /></svg>";
         return data;
     }
 }
