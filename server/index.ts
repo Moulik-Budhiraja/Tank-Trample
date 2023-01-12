@@ -1,6 +1,6 @@
 import { Socket } from 'socket.io';
-import { Game } from './components/game';
-import { Player } from './components/player';
+import { Game } from './common/structures/game';
+import { Player } from './common/structures/player';
 
 const express = require('express');
 const app = express();

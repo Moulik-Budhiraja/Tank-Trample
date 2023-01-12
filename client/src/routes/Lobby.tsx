@@ -1,11 +1,10 @@
 import { socket } from '../service/socket';
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { GameValidation } from '../types/gameTypes';
+import { GameValidation } from '../../../server/common/types/gameTypes';
 import { InvalidGameCode } from '../components/errorMessages';
-import { Player, PlayerList } from '../types/playerTypes';
 import { GenericPlayerList } from '../components/playerLists';
-import { Name } from '../types/playerTypes';
+import { Name, CondensedPlayer, CondensedPlayerList } from '../../../server/common/types/playerTypes';
 
 /**
  * Renders the Lobby page.
@@ -18,7 +17,7 @@ export function Lobby() {
   const [gameCode, setGameCode] = useState(String);
   const [gameCodeError, setGameCodeError] = useState(false);
 
-  const [players, setPlayers] = useState([] as Player[]);
+  const [players, setPlayers] = useState([] as CondensedPlayer[]);
   
   const [myName, setMyName] = useState(String);
 
@@ -43,7 +42,7 @@ export function Lobby() {
       }
     });
 
-    socket.on('player-list', (data: PlayerList) => {
+    socket.on('player-list', (data: CondensedPlayerList) => {
       setPlayers(data.players);
     });
 

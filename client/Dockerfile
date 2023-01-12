@@ -2,7 +2,9 @@ FROM node:16-alpine
 
 WORKDIR /app
 
-COPY . .
+COPY ./client .
+
+ADD ./server/common/ ../server/common/
 
 RUN npm ci 
 

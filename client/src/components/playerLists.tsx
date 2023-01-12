@@ -1,7 +1,7 @@
-import { Player } from '../types/playerTypes';
+import { CondensedPlayer } from '../../../server/common/types/playerTypes';
 
 type genericPlayerListProps = {
-  players: Player[];
+  players: CondensedPlayer[];
 };
 
 /**

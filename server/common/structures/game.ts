@@ -1,13 +1,7 @@
 import { Socket } from 'socket.io';
-import { Player, CondensedPlayer } from './player';
-
-/**
- * Represents the game code that the player is trying to join
- */
-type GameValidation = {
-    gameCode: string;
-    valid: boolean;
-};
+import { Player } from './player';
+import { CondensedPlayer } from '../types/playerTypes';
+import { GameValidation } from '../types/gameTypes';
 
 /**
  * Represents a game that is being played

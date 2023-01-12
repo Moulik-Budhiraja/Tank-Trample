@@ -1,0 +1,16 @@
+version: "3.3"
+services:
+  
+  tank-trample-client:
+    build:
+      context: .
+      dockerfile: client/Dockerfile
+    ports:
+      - "3000:3000"
+
+  tank-trample-server:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    ports:
+      - "3001:3001"

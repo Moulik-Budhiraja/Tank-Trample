@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { socket } from '../service/socket';
 import styled from 'styled-components';
-import { GameValidation } from '../types/gameTypes';
+import { GameValidation } from '../../../server/common/types/gameTypes'
 import { InvalidGameCode } from '../components/errorMessages';
 
 /**
