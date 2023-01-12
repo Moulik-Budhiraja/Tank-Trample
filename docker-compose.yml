@@ -1,6 +1,7 @@
 version: "3.3"
 services:
-   
+  
+  # Client Version: 0.0.3 
   tank-trample-client:
     build:
       context: .
@@ -8,6 +9,7 @@ services:
     ports:
       - "3000:3000"
 
+  # Server Version: 0.0.2
   tank-trample-server:
     build:
       context: .
