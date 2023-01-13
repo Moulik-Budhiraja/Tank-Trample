@@ -1,6 +1,7 @@
 import { Socket } from 'socket.io';
 import { Game } from './game';
 import { Name, CondensedPlayer } from '../types/playerTypes';
+import { Position } from './position';
 
 /**
  * Represents a player in the game
@@ -12,6 +13,7 @@ export class Player {
     id: string;
     name: string = '';
     gameCode: string = '';
+    position: Position = new Position(0, 0);
 
     constructor(socket: Socket) {
         this.socket = socket;

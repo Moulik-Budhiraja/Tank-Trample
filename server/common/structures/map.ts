@@ -1,16 +1,22 @@
+import { Position } from './position';
+
 /**
  * Represents a node in a maze
  *
  * @param id The id of the node
  */
-class Node {
+export class MapNode {
     id: number;
-    neighbours: Node[];
-    connected: Node[];
-    constructor(id: number) {
+    neighbours: MapNode[];
+    connected: MapNode[];
+    position: Position;
+
+    constructor(id: number, x: number, y: number) {
         this.id = id;
         this.neighbours = [];
         this.connected = [];
+
+        this.position = new Position(x, y);
     }
 }
 
@@ -26,7 +32,7 @@ export class Map {
     height: number;
     width: number;
     scale: number;
-    nodes: Node[][];
+    nodes: MapNode[][];
 
     constructor(length: number, width: number, scale: number = 100) {
         this.height = length;
@@ -46,9 +52,15 @@ export class Map {
     populateNodes() {
         this.nodes = [];
         for (let i = 0; i < this.height; i++) {
-            let row: Node[] = [];
+            let row: MapNode[] = [];
             for (let j = 0; j < this.width; j++) {
-                row.push(new Node(i * this.width + j));
+                row.push(
+                    new MapNode(
+                        i * this.width + j,
+                        j * this.scale,
+                        i * this.scale
+                    )
+                );
             }
             this.nodes.push(row);
         }
@@ -81,8 +93,8 @@ export class Map {
             this.nodes[Math.floor(Math.random() * this.height)][
                 Math.floor(Math.random() * this.width)
             ];
-        let border: Node[] = [];
-        let inside: Node[] = [node];
+        let border: MapNode[] = [];
+        let inside: MapNode[] = [node];
 
         for (let neighbour of node.neighbours) {
             border.push(neighbour);
@@ -128,7 +140,7 @@ export class Map {
         let toAdd = Math.floor((maxEdges - edges) * openness);
 
         for (let i = 0; i < toAdd; i++) {
-            let node: Node;
+            let node: MapNode;
             while (true) {
                 let row = Math.floor(Math.random() * this.height);
                 let col = Math.floor(Math.random() * this.width);
@@ -137,7 +149,7 @@ export class Map {
                     break;
                 }
             }
-            let neighbour: Node;
+            let neighbour: MapNode;
             while (true) {
                 neighbour =
                     node.neighbours[
@@ -150,6 +162,10 @@ export class Map {
             node.connected.push(neighbour);
             neighbour.connected.push(node);
         }
+    }
+
+    getNode(row: number, col: number): MapNode {
+        return this.nodes[row][col];
     }
 
     /**
