@@ -3,6 +3,7 @@ import { Player } from './player';
 import { CondensedPlayer } from '../types/playerTypes';
 import { GameValidation } from '../types/gameTypes';
 import { Ping } from '../types/networkComponents';
+import { Round } from './round';
 
 /**
  * Represents a game that is being played
@@ -15,9 +16,11 @@ export class Game {
     static io: any;
     gameCode: string;
     playerList: Player[] = [];
+    currentRound: Round;
 
     constructor() {
         this.gameCode = this.generateGameCode();
+        this.currentRound = new Round(this.gameCode, this.playerList, 0);
 
         Game.games.push(this);
     }
@@ -52,6 +55,11 @@ export class Game {
      */
     addPlayer(player: Player) {
         this.playerList.push(player);
+
+        if (this.playerList.length === 1) {
+            player.host = true;
+            player.sendUpdate();
+        }
     }
 
     /**
@@ -61,6 +69,11 @@ export class Game {
      */
     removePlayer(player: Player) {
         this.playerList = this.playerList.filter((p) => p.id !== player.id);
+
+        if (player.host && this.playerList.length > 0) {
+            this.playerList[0].host = true;
+            this.playerList[0].sendUpdate();
+        }
     }
 
     /**
@@ -128,14 +141,14 @@ export class Game {
      * @param gameCode The game code to get the game by
      * @returns The game with the game code
      */
-    static getGameByCode(gameCode: string): Game | undefined {
+    static getGameByCode(gameCode: string): Game | null {
         for (let game of Game.games) {
             if (game.gameCode === gameCode) {
                 return game;
             }
         }
 
-        return undefined;
+        return null;
     }
 
     /**
@@ -162,8 +175,7 @@ export class Game {
 
         player.socket.on('join-game', (data: GameValidation) => {
             let game = Game.getGameByCode(data.gameCode);
-            if (game === undefined || game.hasPlayer(player)) {
-                // ! TODO: THIS IS A WORKAROUND FIX LATER
+            if (game === null || game.hasPlayer(player)) {
                 return;
             }
 
@@ -178,12 +190,19 @@ export class Game {
 
             // Set name also updates the player list
             player.setName(`Player ${game?.playerList.length}`);
-            player.sendName();
+            player.sendUpdate();
         });
 
         player.socket.on('ping', (data: Ping) => {
             data.timeReceived = Date.now();
             player.socket.emit('pong', data);
+        });
+
+        player.socket.on('start-game', () => {
+            let game = Game.getGameByCode(player.gameCode);
+            if (game !== null && player.host && game.playerList.length > 1) {
+                Game.io.to(player.gameCode).emit('game-started');
+            }
         });
     }
 }

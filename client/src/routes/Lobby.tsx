@@ -4,7 +4,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { GameValidation } from '../../../server/common/types/gameTypes';
 import { InvalidGameCode } from '../components/errorMessages';
 import { GenericPlayerList } from '../components/playerLists';
-import { Name, CondensedPlayer, CondensedPlayerList } from '../../../server/common/types/playerTypes';
+import { CondensedPlayer, CondensedPlayerList } from '../../../server/common/types/playerTypes';
 import { PingTracker } from '../components/pingTracker';
 
 /**
@@ -21,6 +21,7 @@ export function Lobby() {
   const [players, setPlayers] = useState([] as CondensedPlayer[]);
   
   const [myName, setMyName] = useState(String);
+  const [isHost, setIsHost] = useState(false);
 
   useEffect(() => {
     setGameCode(searchParams.get('gameCode') || '');
@@ -47,8 +48,13 @@ export function Lobby() {
       setPlayers(data.players);
     });
 
-    socket.on('current-name', (data: Name) => {
+    socket.on('player-update', (data: CondensedPlayer) => {
       setMyName(data.name);
+      setIsHost(data.host);
+    })
+
+    socket.on('game-started', () => {
+      navigate('/play');
     })
 
   }, [searchParams.get(gameCode)]);
@@ -68,38 +74,51 @@ export function Lobby() {
 
   }
 
+  function startGame() {
+    if (isHost) {
+      socket.emit('start-game');
+    }
+  }
+
   return (
     <>
       <h1 style={{textAlign: 'center'}}>Lobby</h1>
 
-      <div
-        style={{
+      <div style={{
           display: 'flex',
-          flexDirection: 'row',
-          justifyContent: 'center',
+          flexDirection: 'column',
           alignItems: 'center',
-          gap: '40px',
-          height: '60vh'
-        }}
-      >
-        <div>
-          <p>Game Code: {gameCode}</p>
-          <p>Current Name: {myName}</p>
-          <input
-            id='setName'
-            onChange={updateInputName}
-            onKeyDown={updateName}
-            type="text"
-            placeholder="Set Name"
-          />
-          <button onClick={updateName}>Update</button>
-          <InvalidGameCode gameCodeError={gameCodeError}></InvalidGameCode>
+        }}>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: '40px',
+            height: '60vh'
+          }}
+        >
+          <div>
+            <p>Game Code: {gameCode}</p>
+            <p>Current Name: {myName}</p>
+            <input
+              id='setName'
+              onChange={updateInputName}
+              onKeyDown={updateName}
+              type="text"
+              placeholder="Set Name"
+            />
+            <button onClick={updateName}>Update</button>
+            <InvalidGameCode gameCodeError={gameCodeError}></InvalidGameCode>
+          </div>
+          <GenericPlayerList players={players}></GenericPlayerList>
         </div>
-        <GenericPlayerList players={players}></GenericPlayerList>
-      </div>
-
+        { isHost && <button onClick={startGame} >Start Game</button>}
+        
       <br />
       <PingTracker></PingTracker>
+      </div>
     </>
   );
 }

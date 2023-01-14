@@ -1,6 +1,6 @@
 import { Socket } from 'socket.io';
 import { Game } from './game';
-import { Name, CondensedPlayer } from '../types/playerTypes';
+import { CondensedPlayer } from '../types/playerTypes';
 import { Position } from './position';
 
 /**
@@ -14,6 +14,7 @@ export class Player {
     name: string = '';
     gameCode: string = '';
     position: Position = new Position(0, 0);
+    host: boolean = false;
 
     constructor(socket: Socket) {
         this.socket = socket;
@@ -24,10 +25,17 @@ export class Player {
      * Sets up all the player related events that the player can listen to
      */
     initializeEvents() {
-        this.socket.on('set-name', (data: Name) => {
+        this.socket.on('set-name', (data: CondensedPlayer) => {
             this.setName(data.name);
-            this.sendName();
+            this.sendUpdate();
         });
+    }
+
+    /**
+     * Sends an update to the player with the current player state
+     */
+    sendUpdate() {
+        this.socket.emit('player-update', this.getCondensed());
     }
 
     /**
@@ -59,15 +67,6 @@ export class Player {
     }
 
     /**
-     * Sends the current name of the player to the client
-     */
-    sendName() {
-        this.socket.emit('current-name', {
-            name: this.name
-        });
-    }
-
-    /**
      * Gets a condensed version of the player
      *
      * @returns A condensed version of the player
@@ -77,7 +76,8 @@ export class Player {
         return {
             id: this.id,
             name: this.name,
-            gameCode: this.gameCode
+            gameCode: this.gameCode,
+            host: this.host
         };
     }
 }

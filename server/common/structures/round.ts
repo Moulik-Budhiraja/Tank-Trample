@@ -1,6 +1,9 @@
 import { Map } from './map';
 import { Player } from './player';
 import { MapNode } from './map';
+import { Projectile } from './projectiles';
+import { CondensedRound } from '../types/gameTypes';
+import { CondensedPlayerList } from '../types/playerTypes';
 
 /**
  * Represents one round of the game
@@ -11,7 +14,7 @@ import { MapNode } from './map';
 export class Round {
     gameCode: string;
     players: Player[];
-    projectiles: any[] = [];
+    projectiles: Projectile[] = [];
     roundNumber: number;
     map: Map;
 
@@ -52,5 +55,15 @@ export class Round {
                 break;
             }
         }
+    }
+
+    getCondensed(): CondensedRound {
+        return {
+            gameCode: this.gameCode,
+            roundNumber: this.roundNumber,
+            projectiles: this.projectiles,
+            players: this.players.map((player) => player.getCondensed()),
+            map: this.map
+        };
     }
 }
