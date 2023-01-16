@@ -164,21 +164,13 @@ export class Map {
         }
     }
 
-    getNode(row: number, col: number): MapNode {
-        return this.nodes[row][col];
-    }
-
     /**
-     * Generates an SVG representation of the map
+     * Generates an SVG representation of the map using paths
      *
-     * @returns SVG an SVG representation of the map as a string
+     * @returns A string containing path data for the SVG
      */
     generateSVG() {
         let data = '';
-        data += `<svg width="${this.width * this.scale}" height="${
-            this.height * this.scale
-        }">`;
-        data += "<path fill='none' stroke='black' stroke-width='2' d='";
 
         // draw the border
         data += `M0 0 L${this.width * this.scale} 0 `;
@@ -213,7 +205,59 @@ export class Map {
             }
         }
 
-        data += "' /></svg>";
         return data;
+    }
+
+    /**
+     * Takes a position and returns the node that position is in
+     * 
+     * @param pos A position on the map
+     * @returns MapNode The node that the position is in
+     */
+    getNodeFromPos(pos: Position) {
+        return this.nodes[Math.floor(pos.y / this.scale)][Math.floor(pos.x / this.scale)]
+    }
+
+    /**
+     * Takes two positions and checks if there is a wall between them
+     * If there is, returns as far as the player can go
+     * 
+     * @param oldPos The position the player is currently in
+     * @param newPos The position the player is trying to move to
+     * @returns Position The position the player is capable of moving to
+     */
+    checkCollision(oldPos: Position, newPos: Position) {
+        // TODO: Handle diagonal collisions
+
+        let oldNode = this.getNodeFromPos(oldPos);
+        let newNode = this.getNodeFromPos(newPos);
+        if (oldNode.connected.includes(newNode) || oldNode === newNode) {
+            return newPos;
+        } 
+
+        let slope = (newPos.y - oldPos.y) / (newPos.x - oldPos.x);
+
+        let h1 = Math.floor(oldPos.y / this.scale) * this.scale;
+        let h2 = Math.ceil(oldPos.y / this.scale) * this.scale;
+        let v1 = Math.floor(oldPos.x / this.scale) * this.scale;
+        let v2 = Math.ceil(oldPos.x / this.scale) * this.scale;
+
+        let x1 = (h1 - oldPos.y) / slope + oldPos.x;
+        let x2 = (h2 - oldPos.y) / slope + oldPos.x;
+        let y1 = (v1 - oldPos.x) * slope + oldPos.y;
+        let y2 = (v2 - oldPos.x) * slope + oldPos.y;
+
+        if (v1 < x1 && x1 < v2 && newPos.y < h1 && h1 < oldPos.y) {
+            return new Position(x1, h1);
+        }
+        if (v1 < x2 && x2 < v2 && oldPos.y < h2 && h2 < newPos.y) {
+            return new Position(x2, h2);
+        }
+        if (h1 < y1 && y1 < h2 && newPos.x < v1 && v1 < oldPos.x) {
+            return new Position(v1, y1);
+        }
+        if (h1 < y2 && y2 < h2 && oldPos.x < v2 && v2 < newPos.x) {
+            return new Position(v2, y2);
+        }
     }
 }
