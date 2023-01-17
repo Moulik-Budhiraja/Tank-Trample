@@ -107,6 +107,15 @@ export class Position {
     }
 
     /**
+     * Returns the time since the last update in ms
+     *
+     * @returns The time since the last update in ms
+     */
+    timeSinceLastUpdate() {
+        return Date.now() - this.lastUpdated;
+    }
+
+    /**
      * Gets the condensed version of the position
      *
      * @returns The condensed version of the position
