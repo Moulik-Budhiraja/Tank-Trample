@@ -1,23 +1,21 @@
 version: "3.3"
 services:
-  
   tank-trample-client:
     build:
       context: .
       dockerfile: client/Dockerfile
-    image: tank-trample-client:0.0.7
+    image: tank-trample-client:0.1.0
     ports:
       - "3000:3000"
 
     pull_policy: build
     restart: always
 
-
   tank-trample-server:
     build:
       context: .
       dockerfile: server/Dockerfile
-    image: tank-trample-server:0.0.6
+    image: tank-trample-server:0.1.0
     ports:
       - "3001:3001"
 
