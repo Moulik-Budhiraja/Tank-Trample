@@ -209,19 +209,38 @@ export class Map {
     }
 
     /**
+     * Gets a node from an x and y coordinate
+     *
+     * @param x The x coordinate of the node
+     * @param y The y coordinate of the node
+     * @returns MapNode The node at the specified coordinates
+     */
+    getNode(x: number, y: number) {
+        if (x < 0 || x >= this.width || y < 0 || y >= this.height) {
+            throw new Error(
+                `Invalid node coordinates (x=${x}, y=${y}) for map of size (width=${this.width}, height=${this.height}`
+            );
+        }
+
+        return this.nodes[y][x];
+    }
+
+    /**
      * Takes a position and returns the node that position is in
-     * 
+     *
      * @param pos A position on the map
      * @returns MapNode The node that the position is in
      */
     getNodeFromPos(pos: Position) {
-        return this.nodes[Math.floor(pos.y / this.scale)][Math.floor(pos.x / this.scale)]
+        return this.nodes[Math.floor(pos.y / this.scale)][
+            Math.floor(pos.x / this.scale)
+        ];
     }
 
     /**
      * Takes two positions and checks if there is a wall between them
      * If there is, returns as far as the player can go
-     * 
+     *
      * @param oldPos The position the player is currently in
      * @param newPos The position the player is trying to move to
      * @returns Position The position the player is capable of moving to
@@ -233,7 +252,7 @@ export class Map {
         let newNode = this.getNodeFromPos(newPos);
         if (oldNode.connected.includes(newNode) || oldNode === newNode) {
             return newPos;
-        } 
+        }
 
         let slope = (newPos.y - oldPos.y) / (newPos.x - oldPos.x);
 

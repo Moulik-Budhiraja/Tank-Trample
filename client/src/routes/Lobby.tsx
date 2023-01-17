@@ -4,7 +4,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { GameValidation } from '../../../server/common/types/gameTypes';
 import { InvalidGameCode } from '../components/errorMessages';
 import { GenericPlayerList } from '../components/playerLists';
-import { CondensedPlayer, CondensedPlayerList } from '../../../server/common/types/playerTypes';
+import { CondensedPlayer } from '../../../server/common/types/playerTypes';
 import { PingTracker } from '../components/pingTracker';
 
 /**
@@ -19,7 +19,7 @@ export function Lobby() {
   const [gameCodeError, setGameCodeError] = useState(false);
 
   const [players, setPlayers] = useState([] as CondensedPlayer[]);
-  
+
   const [myName, setMyName] = useState(String);
   const [isHost, setIsHost] = useState(false);
 
@@ -44,34 +44,41 @@ export function Lobby() {
       }
     });
 
-    socket.on('player-list', (data: CondensedPlayerList) => {
+    socket.on('player-list', (data: { players: CondensedPlayer[] }) => {
       setPlayers(data.players);
     });
 
     socket.on('player-update', (data: CondensedPlayer) => {
       setMyName(data.name);
       setIsHost(data.host);
-    })
+    });
 
     socket.on('game-started', () => {
       navigate('/play');
-    })
-
+    });
   }, [searchParams.get(gameCode)]);
 
   function updateInputName(event: React.ChangeEvent<HTMLInputElement>) {
     setName(event.currentTarget.value);
   }
 
-  function updateName(event: React.KeyboardEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement, MouseEvent>) {
-    if (event.type === 'keydown' && ((event as React.KeyboardEvent).key !== 'Enter')) {
+  function updateName(
+    event:
+      | React.KeyboardEvent<HTMLInputElement>
+      | React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) {
+    if (
+      event.type === 'keydown' &&
+      (event as React.KeyboardEvent).key !== 'Enter'
+    ) {
       return;
     }
 
     socket.emit('set-name', { name: name });
-    let input: HTMLInputElement = document.getElementById('setName') as HTMLInputElement;
+    let input: HTMLInputElement = document.getElementById(
+      'setName'
+    ) as HTMLInputElement;
     input!.value = '';
-
   }
 
   function startGame() {
@@ -82,13 +89,15 @@ export function Lobby() {
 
   return (
     <>
-      <h1 style={{textAlign: 'center'}}>Lobby</h1>
+      <h1 style={{ textAlign: 'center' }}>Lobby</h1>
 
-      <div style={{
+      <div
+        style={{
           display: 'flex',
           flexDirection: 'column',
-          alignItems: 'center',
-        }}>
+          alignItems: 'center'
+        }}
+      >
         <div
           style={{
             display: 'flex',
@@ -103,7 +112,7 @@ export function Lobby() {
             <p>Game Code: {gameCode}</p>
             <p>Current Name: {myName}</p>
             <input
-              id='setName'
+              id="setName"
               onChange={updateInputName}
               onKeyDown={updateName}
               type="text"
@@ -114,10 +123,10 @@ export function Lobby() {
           </div>
           <GenericPlayerList players={players}></GenericPlayerList>
         </div>
-        { isHost && <button onClick={startGame} >Start Game</button>}
-        
-      <br />
-      <PingTracker></PingTracker>
+        {isHost && <button onClick={startGame}>Start Game</button>}
+
+        <br />
+        <PingTracker></PingTracker>
       </div>
     </>
   );

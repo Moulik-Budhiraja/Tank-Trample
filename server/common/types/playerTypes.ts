@@ -1,3 +1,5 @@
+import { CondensedPosition } from './positionTypes';
+
 /**
  * Represents a condensed version of a player with
  * only the necessary information
@@ -7,8 +9,7 @@ export type CondensedPlayer = {
     name: string;
     gameCode: string;
     host: boolean;
-};
-
-export type CondensedPlayerList = {
-    players: CondensedPlayer[];
+    position: CondensedPosition;
+    bodyAngle: number;
+    turretAngle: number;
 };

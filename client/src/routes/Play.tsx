@@ -1,6 +1,12 @@
 import { Tank } from '../components/tank';
 import { useEffect, useState } from 'react';
-import { useInterval } from '../hooks/useInterval';
+import {
+  CondensedRound,
+  GameEvent
+} from '../../../server/common/types/gameTypes';
+import { CondensedPosition } from '../../../server/common/types/positionTypes';
+import { socket } from '../service/socket';
+import { CondensedPlayer } from '../../../server/common/types/playerTypes';
 
 const keys = {
   w: false,
@@ -9,13 +15,71 @@ const keys = {
   d: false
 };
 
+const myPosition: CondensedPosition = { x: 150, y: 50 };
+let myBodyAngle: number = 0;
+let myTurretAngle: number = 0;
+let myEvents: GameEvent[] = [];
+let lastPost: number = 0;
+
+function newMoveEvent(
+  position: CondensedPosition,
+  bodyAngle: number,
+  turretAngle: number
+) {
+  // If a move event already exists, update it
+  // If not, create a new one
+
+  const existingMoveEvent = myEvents.find((event) => {
+    return event.type === 'move';
+  });
+
+  if (existingMoveEvent) {
+    existingMoveEvent.position = position;
+    existingMoveEvent.bodyAngle = bodyAngle;
+    existingMoveEvent.turretAngle = turretAngle;
+
+    // console.log('updated move event');
+    // console.table(existingMoveEvent);
+  } else {
+    const newMoveEvent: GameEvent = {
+      type: 'move',
+      position: position,
+      bodyAngle: bodyAngle,
+      turretAngle: turretAngle
+    };
+
+    myEvents.push(newMoveEvent);
+  }
+
+  if (Date.now() - lastPost > 1000 / 20) {
+    socket.emit('events', { events: myEvents });
+    console.log('Sent events', Date.now());
+    console.table(myEvents[0]);
+    myEvents = [];
+  }
+}
+
 /**
  * Renders the play page.
  */
 export function Play() {
-  const [pos, setPos] = useState({ x: 150, y: 50 });
+  const [pos, setPos] = useState(myPosition);
   const [bodyRotation, setBodyRotation] = useState(0);
   const [turretRotation, setTurretRotation] = useState(0);
+
+  const [players, setPlayers] = useState<CondensedPlayer[]>([
+    {
+      id: 'lkdsajf',
+      name: 'jksdfa',
+      gameCode: 'gasdkfjh',
+      host: false,
+      position: { x: 0, y: 0 },
+      bodyAngle: 0,
+      turretAngle: 0
+    }
+  ]);
+
+  const VELOCITY = 3;
 
   type keyTypes = 'w' | 'a' | 's' | 'd';
 
@@ -38,47 +102,58 @@ export function Play() {
     // console.table(keys);
   }
 
+  function handleRotation() {}
+
   function handleMove() {
     // Use last move and keys to determine new move
 
     if (keys.w) {
-      setPos((prevPos) => ({ ...prevPos, y: prevPos.y - 3 }));
+      setPos((prevPos) => ({ ...prevPos, y: prevPos.y - VELOCITY }));
+      myPosition.y -= VELOCITY;
     }
 
     if (keys.a) {
-      setPos((prevPos) => ({ ...prevPos, x: prevPos.x - 3 }));
+      setPos((prevPos) => ({ ...prevPos, x: prevPos.x - VELOCITY }));
+      myPosition.x -= VELOCITY;
     }
 
     if (keys.s) {
-      setPos((prevPos) => ({ ...prevPos, y: prevPos.y + 3 }));
+      setPos((prevPos) => ({ ...prevPos, y: prevPos.y + VELOCITY }));
+      myPosition.y += VELOCITY;
     }
 
     if (keys.d) {
-      setPos((prevPos) => ({ ...prevPos, x: prevPos.x + 3 }));
+      setPos((prevPos) => ({ ...prevPos, x: prevPos.x + VELOCITY }));
+      myPosition.x += VELOCITY;
     }
 
-    let newRotation: number;
+    let targetRotation: number;
 
     if (keys.w && keys.a) {
-      newRotation = 315;
+      targetRotation = 315;
     } else if (keys.w && keys.d) {
-      newRotation = 45;
+      targetRotation = 45;
     } else if (keys.s && keys.a) {
-      newRotation = 225;
+      targetRotation = 225;
     } else if (keys.s && keys.d) {
-      newRotation = 135;
+      targetRotation = 135;
     } else if (keys.w) {
-      newRotation = 0;
+      targetRotation = 0;
     } else if (keys.a) {
-      newRotation = 270;
+      targetRotation = 270;
     } else if (keys.s) {
-      newRotation = 180;
+      targetRotation = 180;
     } else if (keys.d) {
-      newRotation = 90;
+      targetRotation = 90;
     } else {
-      newRotation = bodyRotation;
+      targetRotation = bodyRotation;
     }
 
+    myBodyAngle = targetRotation; // KEEP THIS LINE
+
+    newMoveEvent(myPosition, myBodyAngle, myTurretAngle);
+
+    // DO FANCY TURN THINGS
     let currentRotation = 0;
     let apparentRotation = currentRotation % 360;
 
@@ -87,13 +162,13 @@ export function Play() {
     if (apparentRotation < 0) {
       apparentRotation += 360;
     }
-    if (apparentRotation < 180 && newRotation > apparentRotation + 180) {
+    if (apparentRotation < 180 && targetRotation > apparentRotation + 180) {
       currentRotation -= 360;
     }
-    if (apparentRotation >= 180 && newRotation <= apparentRotation - 180) {
+    if (apparentRotation >= 180 && targetRotation <= apparentRotation - 180) {
       currentRotation += 360;
     }
-    currentRotation += newRotation - apparentRotation;
+    currentRotation += targetRotation - apparentRotation;
 
     setBodyRotation(currentRotation);
   }
@@ -116,8 +191,9 @@ export function Play() {
     const degrees = radians * (180 / Math.PI);
 
     setTurretRotation(degrees + 90);
+    myTurretAngle = degrees + 90;
 
-    console.table({ pos: pos, mousePos: mousePos });
+    newMoveEvent(myPosition, myBodyAngle, myTurretAngle);
   }
 
   useEffect(() => {
@@ -135,6 +211,12 @@ export function Play() {
       clearInterval(moveInterval);
     };
   }, [keys, pos]);
+
+  useEffect(() => {
+    socket.on('roundUpdate', (data: CondensedRound) => {
+      setPlayers(data.players);
+    });
+  }, []);
 
   return (
     <>
@@ -161,11 +243,22 @@ export function Play() {
         >
           <Tank
             pos={pos}
-            width={50}
-            height={50}
+            width={35}
+            height={35}
             bodyRotation={bodyRotation}
             turretRotation={turretRotation}
           />
+
+          {players.map((player) => (
+            <Tank
+              key={player.id}
+              pos={player.position}
+              width={35}
+              height={35}
+              bodyRotation={player.bodyAngle}
+              turretRotation={player.turretAngle}
+            />
+          ))}
         </div>
       </div>
     </>

@@ -14,6 +14,8 @@ export class Player {
     name: string = '';
     gameCode: string = '';
     position: Position = new Position(0, 0);
+    bodyAngle: number = 0;
+    turretAngle: number = 0;
     host: boolean = false;
 
     constructor(socket: Socket) {
@@ -77,7 +79,10 @@ export class Player {
             id: this.id,
             name: this.name,
             gameCode: this.gameCode,
-            host: this.host
+            host: this.host,
+            position: this.position.getCondensed(),
+            bodyAngle: this.bodyAngle,
+            turretAngle: this.turretAngle
         };
     }
 }

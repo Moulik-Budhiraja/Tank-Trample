@@ -2,8 +2,9 @@ import { Map } from './map';
 import { Player } from './player';
 import { MapNode } from './map';
 import { Projectile } from './projectiles';
-import { CondensedRound } from '../types/gameTypes';
-import { CondensedPlayerList } from '../types/playerTypes';
+import { CondensedRound, GameEvent } from '../types/gameTypes';
+import { Game } from './game';
+import { Position, Velocity } from './position';
 
 /**
  * Represents one round of the game
@@ -17,6 +18,7 @@ export class Round {
     projectiles: Projectile[] = [];
     roundNumber: number;
     map: Map;
+    updateInterval: NodeJS.Timeout | null = null;
 
     constructor(gameCode: string, players: Player[], roundNumber: number) {
         this.gameCode = gameCode;
@@ -28,6 +30,8 @@ export class Round {
             Math.floor(Math.random() * 10) + 10,
             Math.floor(Math.random() * 10) + 10
         );
+
+        this.initializePlayers();
     }
 
     initializePlayers() {
@@ -36,10 +40,11 @@ export class Round {
 
         for (let player of this.players) {
             while (true) {
+                console.log(this.map.nodes);
                 // Get a random node
                 let node = this.map.getNode(
-                    Math.floor(Math.random() * this.map.height),
-                    Math.floor(Math.random() * this.map.width)
+                    Math.floor(Math.random() * this.map.width),
+                    Math.floor(Math.random() * this.map.height)
                 );
 
                 if (usedNodes.has(node)) {
@@ -55,6 +60,44 @@ export class Round {
                 break;
             }
         }
+
+        // Initialize event listeners for each player
+        for (let player of this.players) {
+            this.initializePlayerEvents(player);
+        }
+
+        Game.io.to(this.gameCode).emit('roundStart', this.getCondensed());
+
+        this.updateInterval = setInterval(() => {
+            Game.io.to(this.gameCode).emit('roundUpdate', this.getCondensed());
+        });
+    }
+
+    /**
+     * Initializes event listeners related to the round
+     * @param player The player to initialize the listeners for
+     */
+    initializePlayerEvents(player: Player) {
+        player.socket.on('events', (data: { events: GameEvent[] }) => {
+            for (let event of data.events) {
+                // MOVE EVENT
+                if (event.type === 'move') {
+                    player.position = Position.fromCondensed(event.position);
+                    player.bodyAngle = event.bodyAngle;
+                    player.turretAngle = event.turretAngle;
+
+                    // SHOOT EVENT
+                } else if (event.type === 'shoot') {
+                    this.projectiles.push(
+                        new Projectile(
+                            Position.fromCondensed(event.position),
+                            Velocity.fromAngle(event.turretAngle, 3),
+                            player.id
+                        )
+                    );
+                }
+            }
+        });
     }
 
     getCondensed(): CondensedRound {
@@ -63,7 +106,7 @@ export class Round {
             roundNumber: this.roundNumber,
             projectiles: this.projectiles,
             players: this.players.map((player) => player.getCondensed()),
-            map: this.map
+            map: this.map.generateSVG()
         };
     }
 }

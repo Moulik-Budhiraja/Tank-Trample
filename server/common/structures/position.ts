@@ -121,7 +121,7 @@ export class Position {
      * @returns The condensed version of the position
      * @see CondensedPosition
      */
-    toCondensed(): CondensedPosition {
+    getCondensed(): CondensedPosition {
         return {
             x: this.x,
             y: this.y,
@@ -198,5 +198,9 @@ export class Velocity {
     add(velocity: Velocity) {
         this.x += velocity.x;
         this.y += velocity.y;
+    }
+
+    static fromAngle(angle: number, speed: number) {
+        return new Velocity(speed * Math.cos(angle), speed * Math.sin(angle));
     }
 }
