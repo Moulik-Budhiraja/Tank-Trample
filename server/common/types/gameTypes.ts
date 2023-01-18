@@ -16,7 +16,7 @@ export type CondensedRound = {
     roundNumber: number;
     projectiles: Projectile[];
     players: CondensedPlayer[];
-    map: string;
+    map: string | null;
 };
 
 export type MoveEvent = {

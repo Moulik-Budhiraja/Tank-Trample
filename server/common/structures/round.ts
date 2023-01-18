@@ -26,10 +26,7 @@ export class Round {
         this.roundNumber = roundNumber;
 
         // Generate map with between 10 and 20 nodes in each direction
-        this.map = new Map(
-            Math.floor(Math.random() * 10) + 10,
-            Math.floor(Math.random() * 10) + 10
-        );
+        this.map = new Map(4, 6, 100);
 
         this.initializePlayers();
     }
@@ -69,8 +66,10 @@ export class Round {
         Game.io.to(this.gameCode).emit('roundStart', this.getCondensed());
 
         this.updateInterval = setInterval(() => {
-            Game.io.to(this.gameCode).emit('roundUpdate', this.getCondensed());
-        }, 1000 / 10);
+            Game.io
+                .to(this.gameCode)
+                .emit('roundUpdate', { ...this.getCondensed(), map: null });
+        }, 1000 / 30);
     }
 
     /**

@@ -23,6 +23,8 @@ let myTurretAngle: number = 0;
 let myEvents: GameEvent[] = [];
 let lastPost: number = 0;
 
+let persistentMapData = '';
+
 function newMoveEvent(
   position: CondensedPosition,
   bodyAngle: number,
@@ -68,6 +70,8 @@ export function Play() {
   const [pos, setPos] = useState(myPosition);
   const [bodyRotation, setBodyRotation] = useState(0);
   const [turretRotation, setTurretRotation] = useState(0);
+
+  const [mapData, setMapData] = useState(persistentMapData);
 
   const [players, setPlayers] = useState<CondensedPlayer[]>([
     {
@@ -215,6 +219,14 @@ export function Play() {
   }, [keys, pos]);
 
   useEffect(() => {
+    socket.on('roundStart', (data: CondensedRound) => {
+      setPlayers(data.players);
+      if (data.map) {
+        persistentMapData = data.map;
+        setMapData(data.map);
+      }
+    });
+
     socket.on('roundUpdate', (data: CondensedRound) => {
       setPlayers(data.players);
     });
@@ -243,6 +255,17 @@ export function Play() {
             overflow: 'hidden'
           }}
         >
+          <svg
+            width="600px"
+            height="400px"
+            style={{
+              position: 'absolute',
+              top: '0',
+              left: '0'
+            }}
+          >
+            <path d={mapData} strokeWidth="3" stroke="black" fill="none"></path>
+          </svg>
           <Tank
             pos={pos}
             width={35}
@@ -265,7 +288,7 @@ export function Play() {
         <div
           style={{
             position: 'absolute',
-            top: '50%',
+            bottom: '1%',
             left: '50%',
             transform: 'translate(-50%, -50%)'
           }}
