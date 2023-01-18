@@ -21,25 +21,22 @@ export function Tank(props: {
           transition: 'transform 0.2s',
           borderRadius: '10%'
         }}
-      >
-        <div
-          style={{
-            width: props.width / 4,
-            height: props.height / 1.2,
-            backgroundColor: 'blue',
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: `translate(-50%, -100%) rotate(${
-              props.turretRotation - props.bodyRotation
-            }deg)`,
-            transformOrigin: '50% 100%',
-            transition: 'none',
+      ></div>
+      <div
+        style={{
+          width: props.width / 4,
+          height: props.height / 1.2,
+          backgroundColor: 'blue',
+          position: 'absolute',
+          top: `${props.pos.y}px`,
+          left: `${props.pos.x}px`,
+          transform: `translate(-50%, -100%) rotate(${props.turretRotation}deg)`,
+          transformOrigin: '50% 100%',
+          transition: 'none',
 
-            borderRadius: '0 0 40px 40px'
-          }}
-        ></div>
-      </div>
+          borderRadius: '0 0 40px 40px'
+        }}
+      ></div>
     </>
   );
 }
