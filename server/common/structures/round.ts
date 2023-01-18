@@ -70,7 +70,7 @@ export class Round {
 
         this.updateInterval = setInterval(() => {
             Game.io.to(this.gameCode).emit('roundUpdate', this.getCondensed());
-        });
+        }, 1000 / 10);
     }
 
     /**

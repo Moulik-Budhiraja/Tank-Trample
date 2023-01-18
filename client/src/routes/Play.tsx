@@ -7,6 +7,8 @@ import {
 import { CondensedPosition } from '../../../server/common/types/positionTypes';
 import { socket } from '../service/socket';
 import { CondensedPlayer } from '../../../server/common/types/playerTypes';
+import { UPDATE_INTERVAL } from '../config';
+import { PingTracker } from '../components/pingTracker';
 
 const keys = {
   w: false,
@@ -51,7 +53,7 @@ function newMoveEvent(
     myEvents.push(newMoveEvent);
   }
 
-  if (Date.now() - lastPost > 1000 / 20) {
+  if (Date.now() - lastPost > UPDATE_INTERVAL) {
     socket.emit('events', { events: myEvents });
     console.log('Sent events', Date.now());
     console.table(myEvents[0]);
@@ -259,6 +261,16 @@ export function Play() {
               turretRotation={player.turretAngle}
             />
           ))}
+        </div>
+        <div
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)'
+          }}
+        >
+          <PingTracker></PingTracker>
         </div>
       </div>
     </>
