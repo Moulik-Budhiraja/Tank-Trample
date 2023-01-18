@@ -108,8 +108,6 @@ export function Play() {
     // console.table(keys);
   }
 
-  function handleRotation() {}
-
   function handleMove() {
     // Use last move and keys to determine new move
 
@@ -159,24 +157,23 @@ export function Play() {
 
     newMoveEvent(myPosition, myBodyAngle, myTurretAngle);
 
-    // DO FANCY TURN THINGS
-    let currentRotation = 0;
-    let apparentRotation = currentRotation % 360;
+    let currentRotation = (bodyRotation + 360) % 360;
+    let smallestRotation = 360;
 
-    currentRotation = currentRotation || 0; // if rot undefined or 0, make 0, else rot
-    apparentRotation = currentRotation % 360;
-    if (apparentRotation < 0) {
-      apparentRotation += 360;
+    let rot1 = (targetRotation - currentRotation + 360) % 360;
+    let rot2 = (currentRotation - targetRotation + 360) % 360;
+    let rot3 = (targetRotation - currentRotation + 540) % 360;
+    let rot4 = (currentRotation - targetRotation + 540) % 360;
+    
+    let rots = [rot1, -rot2, rot3, -rot4];
+    
+    for (let rot of rots) {
+      if (Math.abs(rot) < Math.abs(smallestRotation)) {
+        smallestRotation = rot;
+      }
     }
-    if (apparentRotation < 180 && targetRotation > apparentRotation + 180) {
-      currentRotation -= 360;
-    }
-    if (apparentRotation >= 180 && targetRotation <= apparentRotation - 180) {
-      currentRotation += 360;
-    }
-    currentRotation += targetRotation - apparentRotation;
-
-    setBodyRotation(currentRotation);
+  
+    setBodyRotation(bodyRotation + smallestRotation);
   }
 
   function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {

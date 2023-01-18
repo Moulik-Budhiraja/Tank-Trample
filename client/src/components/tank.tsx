@@ -18,7 +18,7 @@ export function Tank(props: {
           top: props.pos.y,
           left: props.pos.x,
           transform: `translate(-50%, -50%) rotate(${props.bodyRotation}deg)`,
-          transition: 'transform 0.2s',
+          transition: 'transform 0.3s',
           borderRadius: '10%'
         }}
       >
