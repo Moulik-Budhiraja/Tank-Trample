@@ -6,9 +6,24 @@ export function Tank(props: {
   height: number;
   bodyRotation: number;
   turretRotation: number;
+  name: string;
 }) {
   return (
     <>
+      <h4
+        style={{
+          position: 'absolute',
+          top: props.pos.y,
+          left: props.pos.x,
+          transform: `translate(-50%, ${-props.height - 25}px)`,
+          whiteSpace: 'nowrap',
+          maxWidth: `${props.width * 2.5}px`,
+          textOverflow: 'ellipsis',
+          overflow: 'hidden'
+        }}
+      >
+        {props.name}
+      </h4>
       <div
         style={{
           width: props.width,
