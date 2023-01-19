@@ -264,6 +264,7 @@ export function Play() {
             <path d={mapData} strokeWidth="3" stroke="black" fill="none"></path>
           </svg>
           <Tank
+            name={'You'}
             pos={pos}
             width={35}
             height={35}
@@ -273,6 +274,7 @@ export function Play() {
 
           {players.map((player) => (
             <Tank
+              name={player.name}
               key={player.id}
               pos={player.position}
               width={35}
