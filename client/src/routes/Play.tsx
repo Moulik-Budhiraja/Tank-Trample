@@ -25,6 +25,8 @@ let lastPost: number = 0;
 
 let persistentMapData = '';
 
+let playerId: string;
+
 function newMoveEvent(
   position: CondensedPosition,
   bodyAngle: number,
@@ -57,8 +59,8 @@ function newMoveEvent(
 
   if (Date.now() - lastPost > UPDATE_INTERVAL) {
     socket.emit('events', { events: myEvents });
-    console.log('Sent events', Date.now());
-    console.table(myEvents[0]);
+    // console.log('Sent events', Date.now());
+    // console.table(myEvents[0]);
     myEvents = [];
   }
 }
@@ -156,24 +158,25 @@ export function Play() {
     myBodyAngle = targetRotation; // KEEP THIS LINE
 
     newMoveEvent(myPosition, myBodyAngle, myTurretAngle);
+    setBodyRotation(targetRotation);
 
-    let currentRotation = (bodyRotation + 360) % 360;
-    let smallestRotation = 360;
+    // let currentRotation = (bodyRotation + 360) % 360;
+    // let smallestRotation = 360;
 
-    let rot1 = (targetRotation - currentRotation + 360) % 360;
-    let rot2 = (currentRotation - targetRotation + 360) % 360;
-    let rot3 = (targetRotation - currentRotation + 540) % 360;
-    let rot4 = (currentRotation - targetRotation + 540) % 360;
+    // let rot1 = (targetRotation - currentRotation + 360) % 360;
+    // let rot2 = (currentRotation - targetRotation + 360) % 360;
+    // let rot3 = (targetRotation - currentRotation + 540) % 360;
+    // let rot4 = (currentRotation - targetRotation + 540) % 360;
     
-    let rots = [rot1, -rot2, rot3, -rot4];
+    // let rots = [rot1, -rot2, rot3, -rot4];
     
-    for (let rot of rots) {
-      if (Math.abs(rot) < Math.abs(smallestRotation)) {
-        smallestRotation = rot;
-      }
-    }
+    // for (let rot of rots) {
+    //   if (Math.abs(rot) < Math.abs(smallestRotation)) {
+    //     smallestRotation = rot;
+    //   }
+    // }
   
-    setBodyRotation(bodyRotation + smallestRotation);
+    // setBodyRotation(bodyRotation + smallestRotation);
   }
 
   function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
@@ -227,6 +230,10 @@ export function Play() {
     socket.on('roundUpdate', (data: CondensedRound) => {
       setPlayers(data.players);
     });
+
+    socket.on('player-update', (data: CondensedPlayer) => {
+        playerId = data.id;
+    })
   }, []);
 
   return (
@@ -263,16 +270,23 @@ export function Play() {
           >
             <path d={mapData} strokeWidth="3" stroke="black" fill="none"></path>
           </svg>
-          <Tank
-            name={'You'}
-            pos={pos}
-            width={35}
-            height={35}
-            bodyRotation={bodyRotation}
-            turretRotation={turretRotation}
-          />
 
-          {players.map((player) => (
+          {players.map((player) => {
+            
+            if (player.id === playerId) return (
+                <Tank
+              name={player.name}
+              key={player.id}
+              pos={player.position}
+              width={35}
+              height={35}
+              bodyRotation={player.bodyAngle}
+              turretRotation={player.turretAngle}
+              ghost={true}
+            />
+            );
+
+            return (
             <Tank
               name={player.name}
               key={player.id}
@@ -282,7 +296,15 @@ export function Play() {
               bodyRotation={player.bodyAngle}
               turretRotation={player.turretAngle}
             />
-          ))}
+          )})}
+                    <Tank
+            name={'You'}
+            pos={pos}
+            width={35}
+            height={35}
+            bodyRotation={bodyRotation}
+            turretRotation={turretRotation}
+          />
         </div>
         <div
           style={{

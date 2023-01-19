@@ -61,6 +61,8 @@ export class Round {
         // Initialize event listeners for each player
         for (let player of this.players) {
             this.initializePlayerEvents(player);
+
+            player.sendUpdate();
         }
 
         Game.io.to(this.gameCode).emit('roundStart', this.getCondensed());
