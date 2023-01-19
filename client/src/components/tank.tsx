@@ -29,6 +29,7 @@ export function Tank(props: {
           width: props.width,
           height: props.height,
           backgroundColor: 'red',
+          outline: '1px solid black',
           position: 'absolute',
           top: props.pos.y,
           left: props.pos.x,
@@ -36,13 +37,36 @@ export function Tank(props: {
           transition: 'transform 0.3s',
           borderRadius: '10%'
         }}
-      ></div>
+      >
+        <div
+        style={{
+          width: props.width / 6,
+          height: props.height,
+          outline: '2px solid black',
+          backgroundColor: 'gray',
+          position: 'absolute',
+          borderRadius: '10%'
+        }}
+        ></div>
+        <div
+        style={{
+          width: props.width / 6,
+          height: props.height,
+          outline: '2px solid black',
+          backgroundColor: 'gray',
+          position: 'absolute',
+          left: props.width - props.width / 6,
+          borderRadius: '10%'
+        }}
+        ></div>
+      </div>
       <div
         style={{
           width: props.width / 4,
           height: props.height / 1.2,
-          backgroundColor: 'blue',
+          backgroundColor: 'crimson',
           position: 'absolute',
+          outline: '1px solid black',
           top: `${props.pos.y}px`,
           left: `${props.pos.x}px`,
           transform: `translate(-50%, -100%) rotate(${props.turretRotation}deg)`,
@@ -50,6 +74,18 @@ export function Tank(props: {
           transition: 'none',
 
           borderRadius: '0 0 40px 40px'
+        }}
+      ></div>
+      <div
+        style={{
+          width: props.width / 2,
+          height: props.height / 2,
+          backgroundColor: 'crimson',
+          outline: '1px solid black',
+          position: 'absolute',
+          top: props.pos.y - props.height / 4,
+          left: props.pos.x - props.width / 4,
+          borderRadius: '100%'
         }}
       ></div>
     </>
