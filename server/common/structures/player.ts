@@ -17,6 +17,9 @@ export class Player {
     bodyAngle: number = 0;
     turretAngle: number = 0;
     host: boolean = false;
+    width: number = 35;
+    height: number = 35;
+    alive: boolean = true;
 
     constructor(socket: Socket) {
         this.socket = socket;
@@ -82,7 +85,73 @@ export class Player {
             host: this.host,
             position: this.position.getCondensed(),
             bodyAngle: this.bodyAngle,
-            turretAngle: this.turretAngle
+            turretAngle: this.turretAngle,
+            width: this.width,
+            height: this.height,
+            alive: this.alive
         };
+    }
+
+    /**
+     * Gets the 4 bounding points of the player accounting for the bodyAngle of the player
+     *
+     * @returns The 4 bounding points of the player
+     */
+    getPoints(): Position[] {
+        let points = [
+            this.position.copy().moveBy(-this.width / 2, -this.height / 2),
+            this.position.copy().moveBy(this.width / 2, -this.height / 2),
+            this.position.copy().moveBy(this.width / 2, this.height / 2),
+            this.position.copy().moveBy(-this.width / 2, this.height / 2)
+        ];
+
+        return points.map((point) =>
+            point.rotate(this.position.x, this.position.y, this.bodyAngle)
+        );
+    }
+
+    /**
+     * Checks if a point is inside the player
+     *
+     * @param point The point to check
+     *
+     * @returns Whether or not the point is inside the player
+     * @see https://en.wikipedia.org/wiki/Shoelace_formula
+     */
+    collidePoint(point: Position): boolean {
+        let points = this.getPoints();
+
+        // Find area of quadrilateral by summing the areas of the 4 triangles
+
+        let area = 0;
+
+        for (let i = 0; i < 4; i++) {
+            let j = (i + 1) % 4;
+
+            area += points[i].x * points[j].y - points[j].x * points[i].y;
+        }
+
+        area = Math.abs(area / 2);
+
+        // Find area of triangles to the point by summing the areas of the 4 triangles
+
+        let areaToPoint = 0;
+
+        for (let a = 0; a < 4; a++) {
+            let b = (a + 1) % 4;
+
+            areaToPoint +=
+                (points[a].x - point.x) * (points[b].y - points[a].y) -
+                (points[a].x - points[b].x) * (point.y - points[a].y);
+        }
+
+        areaToPoint = Math.abs(areaToPoint / 2);
+
+        // Check if the point is in the player
+
+        console.log(points);
+        console.log(areaToPoint, area);
+
+        return areaToPoint <= area;
     }
 }

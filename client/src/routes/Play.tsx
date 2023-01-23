@@ -95,17 +95,7 @@ export function Play() {
 
   const [mapData, setMapData] = useState(persistentMapData);
 
-  const [players, setPlayers] = useState<CondensedPlayer[]>([
-    {
-      id: 'lkdsajf',
-      name: 'jksdfa',
-      gameCode: 'gasdkfjh',
-      host: false,
-      position: { x: 0, y: 0 },
-      bodyAngle: 0,
-      turretAngle: 0
-    }
-  ]);
+  const [players, setPlayers] = useState<CondensedPlayer[]>([]);
 
   const [projectiles, setProjectiles] = useState<CondensedProjectile[]>([]);
 
@@ -295,6 +285,8 @@ export function Play() {
 
           {/* RENDER ALL TANKS, AND SELF AS SHADOW */}
           {players.map((player) => {
+            if (!player.alive) return null;
+
             if (player.id === playerId)
               return (
                 <Tank

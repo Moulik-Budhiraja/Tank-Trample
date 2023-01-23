@@ -107,6 +107,29 @@ export class Position {
     }
 
     /**
+     * Rotates the position around the given x and y by the given angle
+     *
+     * @param x The x position to rotate around
+     * @param y The y position to rotate around
+     * @param angle The angle to rotate by
+     *
+     * @returns The position after rotating
+     */
+    rotate(x: number, y: number, angle: number): Position {
+        let dx = this.x - x;
+        let dy = this.y - y;
+
+        angle = (angle * Math.PI) / 180;
+
+        this.x = x + dx * Math.cos(angle) - dy * Math.sin(angle);
+        this.y = y + dx * Math.sin(angle) + dy * Math.cos(angle);
+
+        this.lastUpdated = Date.now();
+
+        return this;
+    }
+
+    /**
      * Returns the time since the last update in ms
      *
      * @returns The time since the last update in ms
@@ -127,6 +150,15 @@ export class Position {
             y: this.y,
             lastUpdated: this.lastUpdated
         };
+    }
+
+    /**
+     * Gets a copy of the position
+     *
+     * @returns A copy of the position
+     */
+    copy(): Position {
+        return new Position(this.x, this.y);
     }
 
     /**

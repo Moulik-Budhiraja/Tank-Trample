@@ -78,6 +78,28 @@ export class Round {
                         1
                     );
                 }
+
+                // Check if the projectile hit a player
+                for (let player of this.players) {
+                    if (player.collidePoint(projectile.position)) {
+                        player.alive = false;
+
+                        console.log(
+                            `${player.name} at ${
+                                player.position.x + ' ' + player.position.y
+                            } was killed by a projectile at ${
+                                projectile.position.x +
+                                ' ' +
+                                projectile.position.y
+                            }`
+                        );
+
+                        this.projectiles.splice(
+                            this.projectiles.indexOf(projectile),
+                            1
+                        );
+                    }
+                }
             }
 
             Game.io
