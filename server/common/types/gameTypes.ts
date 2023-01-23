@@ -15,7 +15,7 @@ export type GameValidation = {
 export type CondensedRound = {
     gameCode: string;
     roundNumber: number;
-    projectiles: Projectile[];
+    projectiles: CondensedProjectile[];
     players: CondensedPlayer[];
     map: string | null;
 };

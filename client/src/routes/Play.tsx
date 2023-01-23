@@ -207,7 +207,18 @@ export function Play() {
   }
 
   function handleClick() {
-    newShootEvent(myPosition, myBodyAngle, myTurretAngle);
+    newShootEvent(
+      {
+        x:
+          myPosition.x +
+          Math.cos((myTurretAngle - 90) * (Math.PI / 180)) * (35 / 1.2),
+        y:
+          myPosition.y +
+          Math.sin((myTurretAngle - 90) * (Math.PI / 180)) * (35 / 1.2)
+      },
+      myBodyAngle,
+      myTurretAngle - 90
+    );
   }
 
   // SET UP LOCAL LISTENERS ON EACH MOUNT

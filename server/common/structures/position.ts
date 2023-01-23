@@ -201,6 +201,7 @@ export class Velocity {
     }
 
     static fromAngle(angle: number, speed: number) {
+        angle = (angle * Math.PI) / 180;
         return new Velocity(speed * Math.cos(angle), speed * Math.sin(angle));
     }
 }

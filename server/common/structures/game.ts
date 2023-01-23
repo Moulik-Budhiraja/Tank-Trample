@@ -203,6 +203,8 @@ export class Game {
             if (game !== null && player.host && game.playerList.length > 1) {
                 Game.io.to(player.gameCode).emit('game-started');
 
+                game.currentRound.endRound();
+
                 game.currentRound = new Round(
                     game.gameCode,
                     game.playerList,

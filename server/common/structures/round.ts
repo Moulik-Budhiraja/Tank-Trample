@@ -15,8 +15,7 @@ import { Position, Velocity } from './position';
 export class Round {
     gameCode: string;
     players: Player[];
-    projectiles: Projectile[] = [];
-    newProjectiles: Projectile[] = [];
+    projectiles: Projectile[];
     roundNumber: number;
     map: Map;
     updateInterval: NodeJS.Timeout | null = null;
@@ -25,6 +24,7 @@ export class Round {
         this.gameCode = gameCode;
         this.players = players;
         this.roundNumber = roundNumber;
+        this.projectiles = [];
 
         // Generate map with between 10 and 20 nodes in each direction
         this.map = new Map(4, 6, 100);
@@ -68,10 +68,17 @@ export class Round {
         Game.io.to(this.gameCode).emit('roundStart', this.getCondensed());
 
         this.updateInterval = setInterval(() => {
-            this.newProjectiles.forEach((projectile) => {
-                this.projectiles.push(projectile);
-            });
-            this.newProjectiles = [];
+            // Update projectiles
+            for (let projectile of this.projectiles) {
+                projectile.update();
+
+                if (projectile.timeFired + projectile.lifeTime < Date.now()) {
+                    this.projectiles.splice(
+                        this.projectiles.indexOf(projectile),
+                        1
+                    );
+                }
+            }
 
             Game.io
                 .to(this.gameCode)
@@ -94,10 +101,10 @@ export class Round {
 
                     // SHOOT EVENT
                 } else if (event.type === 'shoot') {
-                    this.newProjectiles.push(
+                    this.projectiles.push(
                         new Projectile(
                             Position.fromCondensed(event.position),
-                            Velocity.fromAngle(event.turretAngle, 3),
+                            Velocity.fromAngle(event.turretAngle, 100),
                             player.id
                         )
                     );
@@ -107,13 +114,25 @@ export class Round {
     }
 
     getCondensed(): CondensedRound {
-        console.log(this.projectiles.length);
         return {
             gameCode: this.gameCode,
             roundNumber: this.roundNumber,
-            projectiles: this.projectiles,
+            projectiles: this.projectiles.map((projectile) =>
+                projectile.getCondensed()
+            ),
             players: this.players.map((player) => player.getCondensed()),
             map: this.map.generateSVG()
         };
+    }
+
+    endRound() {
+        if (this.updateInterval) {
+            clearInterval(this.updateInterval);
+        }
+
+        // remove socket listeners
+        for (let player of this.players) {
+            player.socket.removeAllListeners('events');
+        }
     }
 }
