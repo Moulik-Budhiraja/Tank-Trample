@@ -9,6 +9,8 @@ import { socket } from '../service/socket';
 import { CondensedPlayer } from '../../../server/common/types/playerTypes';
 import { UPDATE_INTERVAL } from '../config';
 import { PingTracker } from '../components/pingTracker';
+import { CondensedProjectile } from '../../../server/common/types/projectileTypes';
+import { Bullet } from '../components/bullet';
 
 const keys = {
   w: false,
@@ -59,8 +61,26 @@ function newMoveEvent(
 
   if (Date.now() - lastPost > UPDATE_INTERVAL) {
     socket.emit('events', { events: myEvents });
-    // console.log('Sent events', Date.now());
-    // console.table(myEvents[0]);
+    myEvents = [];
+  }
+}
+
+function newShootEvent(
+  position: CondensedPosition,
+  bodyAngle: number,
+  turretAngle: number
+) {
+  const newShootEvent: GameEvent = {
+    type: 'shoot',
+    position: position,
+    bodyAngle: bodyAngle,
+    turretAngle: turretAngle
+  };
+
+  myEvents.push(newShootEvent);
+
+  if (Date.now() - lastPost > UPDATE_INTERVAL) {
+    socket.emit('events', { events: myEvents });
     myEvents = [];
   }
 }
@@ -86,6 +106,8 @@ export function Play() {
       turretAngle: 0
     }
   ]);
+
+  const [projectiles, setProjectiles] = useState<CondensedProjectile[]>([]);
 
   const VELOCITY = 3;
 
@@ -155,28 +177,10 @@ export function Play() {
       targetRotation = bodyRotation;
     }
 
-    myBodyAngle = targetRotation; // KEEP THIS LINE
+    myBodyAngle = targetRotation;
 
     newMoveEvent(myPosition, myBodyAngle, myTurretAngle);
     setBodyRotation(targetRotation);
-
-    // let currentRotation = (bodyRotation + 360) % 360;
-    // let smallestRotation = 360;
-
-    // let rot1 = (targetRotation - currentRotation + 360) % 360;
-    // let rot2 = (currentRotation - targetRotation + 360) % 360;
-    // let rot3 = (targetRotation - currentRotation + 540) % 360;
-    // let rot4 = (currentRotation - targetRotation + 540) % 360;
-    
-    // let rots = [rot1, -rot2, rot3, -rot4];
-    
-    // for (let rot of rots) {
-    //   if (Math.abs(rot) < Math.abs(smallestRotation)) {
-    //     smallestRotation = rot;
-    //   }
-    // }
-  
-    // setBodyRotation(bodyRotation + smallestRotation);
   }
 
   function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
@@ -202,6 +206,11 @@ export function Play() {
     newMoveEvent(myPosition, myBodyAngle, myTurretAngle);
   }
 
+  function handleClick() {
+    newShootEvent(myPosition, myBodyAngle, myTurretAngle);
+  }
+
+  // SET UP LOCAL LISTENERS ON EACH MOUNT
   useEffect(() => {
     document.querySelector('body')?.addEventListener('keydown', handleKeyDown);
     document.querySelector('body')?.addEventListener('keyup', handleKeyUp);
@@ -218,6 +227,7 @@ export function Play() {
     };
   }, [keys, pos]);
 
+  // SET UP SOCKET LISTENERS ON FIRST MOUNT
   useEffect(() => {
     socket.on('roundStart', (data: CondensedRound) => {
       setPlayers(data.players);
@@ -229,18 +239,19 @@ export function Play() {
 
     socket.on('roundUpdate', (data: CondensedRound) => {
       setPlayers(data.players);
+      setProjectiles(data.projectiles);
     });
 
     socket.on('player-update', (data: CondensedPlayer) => {
-        playerId = data.id;
-    })
+      playerId = data.id;
+    });
   }, []);
 
   return (
     <>
       <div
         onMouseMove={handleMouseMove}
-        onClick={handleMouseMove}
+        onClick={handleClick}
         style={{
           width: '100%',
           height: 'calc(100vh - 1rem)'
@@ -271,33 +282,35 @@ export function Play() {
             <path d={mapData} strokeWidth="3" stroke="black" fill="none"></path>
           </svg>
 
+          {/* RENDER ALL TANKS, AND SELF AS SHADOW */}
           {players.map((player) => {
-            
-            if (player.id === playerId) return (
+            if (player.id === playerId)
+              return (
                 <Tank
-              name={player.name}
-              key={player.id}
-              pos={player.position}
-              width={35}
-              height={35}
-              bodyRotation={player.bodyAngle}
-              turretRotation={player.turretAngle}
-              ghost={true}
-            />
-            );
+                  name={player.name}
+                  key={player.id}
+                  pos={player.position}
+                  width={35}
+                  height={35}
+                  bodyRotation={player.bodyAngle}
+                  turretRotation={player.turretAngle}
+                  ghost={true}
+                />
+              );
 
             return (
-            <Tank
-              name={player.name}
-              key={player.id}
-              pos={player.position}
-              width={35}
-              height={35}
-              bodyRotation={player.bodyAngle}
-              turretRotation={player.turretAngle}
-            />
-          )})}
-                    <Tank
+              <Tank
+                name={player.name}
+                key={player.id}
+                pos={player.position}
+                width={35}
+                height={35}
+                bodyRotation={player.bodyAngle}
+                turretRotation={player.turretAngle}
+              />
+            );
+          })}
+          <Tank
             name={'You'}
             pos={pos}
             width={35}
@@ -305,6 +318,17 @@ export function Play() {
             bodyRotation={bodyRotation}
             turretRotation={turretRotation}
           />
+
+          {/* RENDER ALL PROJECTILES */}
+          {projectiles.map((projectile) => {
+            return (
+              <Bullet
+                key={projectile.id}
+                pos={projectile.pos}
+                vel={projectile.vel}
+              ></Bullet>
+            );
+          })}
         </div>
         <div
           style={{

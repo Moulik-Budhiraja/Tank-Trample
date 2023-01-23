@@ -8,46 +8,44 @@ export function Tank(props: {
   bodyRotation: number;
   turretRotation: number;
   name: string;
-    ghost?: boolean;
+  ghost?: boolean;
 }) {
-    const [lastBodyRotation, setLastBodyRotation] = useState(Number);
+  const [lastBodyRotation, setLastBodyRotation] = useState(Number);
 
-    useEffect(() => {
-        if (lastBodyRotation !== props.bodyRotation) {
-            console.log(`Current Rotation: ${props.bodyRotation}, Last Rotation: ${lastBodyRotation}`)
-        }
+  useEffect(() => {
+    let currentRotation = (lastBodyRotation + 360) % 360;
+    let smallestRotation = 360;
 
-        let currentRotation = (lastBodyRotation + 360) % 360;
-        let smallestRotation = 360;
+    let rot1 = (props.bodyRotation - currentRotation + 360) % 360;
+    let rot2 = (currentRotation - props.bodyRotation + 360) % 360;
+    let rot3 = (props.bodyRotation - currentRotation + 540) % 360;
+    let rot4 = (currentRotation - props.bodyRotation + 540) % 360;
 
-        let rot1 = (props.bodyRotation - currentRotation + 360) % 360;
-        let rot2 = (currentRotation - props.bodyRotation + 360) % 360;
-        let rot3 = (props.bodyRotation - currentRotation + 540) % 360;
-        let rot4 = (currentRotation - props.bodyRotation + 540) % 360;
-        
-        let rots = [rot1, -rot2, rot3, -rot4];
-        
-        for (let rot of rots) {
-        if (Math.abs(rot) < Math.abs(smallestRotation)) {
-            smallestRotation = rot;
-        }
-        }
-    
-        setLastBodyRotation(lastBodyRotation + smallestRotation);
-    });
+    let rots = [rot1, -rot2, rot3, -rot4];
 
-    let tankOpacity = 1;
-    let textOpacity = 1;
-    if (props.ghost) {
-        tankOpacity = 0.5;
-        textOpacity = 0;
+    for (let rot of rots) {
+      if (Math.abs(rot) < Math.abs(smallestRotation)) {
+        smallestRotation = rot;
+      }
     }
+
+    setLastBodyRotation(lastBodyRotation + smallestRotation);
+  });
+
+  let tankOpacity = 1;
+  let textOpacity = 1;
+  if (props.ghost) {
+    tankOpacity = 0.5;
+    textOpacity = 0;
+  }
 
   return (
     <>
-      <div style={{
-        opacity: tankOpacity
-      }}>
+      <div
+        style={{
+          opacity: tankOpacity
+        }}
+      >
         <h4
           style={{
             position: 'absolute',
@@ -58,7 +56,7 @@ export function Tank(props: {
             maxWidth: `${props.width * 2.5}px`,
             textOverflow: 'ellipsis',
             overflow: 'hidden',
-            opacity: textOpacity,
+            opacity: textOpacity
           }}
         >
           {props.name}
@@ -78,25 +76,25 @@ export function Tank(props: {
           }}
         >
           <div
-          style={{
-            width: props.width / 6,
-            height: props.height,
-            outline: '2px solid black',
-            backgroundColor: 'gray',
-            position: 'absolute',
-            borderRadius: '10%'
-          }}
+            style={{
+              width: props.width / 6,
+              height: props.height,
+              outline: '2px solid black',
+              backgroundColor: 'gray',
+              position: 'absolute',
+              borderRadius: '10%'
+            }}
           ></div>
           <div
-          style={{
-            width: props.width / 6,
-            height: props.height,
-            outline: '2px solid black',
-            backgroundColor: 'gray',
-            position: 'absolute',
-            left: props.width - props.width / 6,
-            borderRadius: '10%'
-          }}
+            style={{
+              width: props.width / 6,
+              height: props.height,
+              outline: '2px solid black',
+              backgroundColor: 'gray',
+              position: 'absolute',
+              left: props.width - props.width / 6,
+              borderRadius: '10%'
+            }}
           ></div>
         </div>
         <div

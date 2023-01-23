@@ -2,6 +2,7 @@ import { Map } from '../structures/map';
 import { Projectile } from '../structures/projectiles';
 import { CondensedPlayer } from './playerTypes';
 import { CondensedPosition } from './positionTypes';
+import { CondensedProjectile } from './projectileTypes';
 
 /**
  * Represents the game code that the player is trying to join

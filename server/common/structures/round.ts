@@ -16,6 +16,7 @@ export class Round {
     gameCode: string;
     players: Player[];
     projectiles: Projectile[] = [];
+    newProjectiles: Projectile[] = [];
     roundNumber: number;
     map: Map;
     updateInterval: NodeJS.Timeout | null = null;
@@ -37,7 +38,6 @@ export class Round {
 
         for (let player of this.players) {
             while (true) {
-                console.log(this.map.nodes);
                 // Get a random node
                 let node = this.map.getNode(
                     Math.floor(Math.random() * this.map.width),
@@ -68,6 +68,11 @@ export class Round {
         Game.io.to(this.gameCode).emit('roundStart', this.getCondensed());
 
         this.updateInterval = setInterval(() => {
+            this.newProjectiles.forEach((projectile) => {
+                this.projectiles.push(projectile);
+            });
+            this.newProjectiles = [];
+
             Game.io
                 .to(this.gameCode)
                 .emit('roundUpdate', { ...this.getCondensed(), map: null });
@@ -89,7 +94,7 @@ export class Round {
 
                     // SHOOT EVENT
                 } else if (event.type === 'shoot') {
-                    this.projectiles.push(
+                    this.newProjectiles.push(
                         new Projectile(
                             Position.fromCondensed(event.position),
                             Velocity.fromAngle(event.turretAngle, 3),
@@ -102,6 +107,7 @@ export class Round {
     }
 
     getCondensed(): CondensedRound {
+        console.log(this.projectiles.length);
         return {
             gameCode: this.gameCode,
             roundNumber: this.roundNumber,

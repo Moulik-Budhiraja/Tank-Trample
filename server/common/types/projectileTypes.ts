@@ -1,4 +1,5 @@
 export type CondensedProjectile = {
+    id: string;
     playerId: string;
     timeCreated: number;
     lifeTime: number;
