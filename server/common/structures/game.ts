@@ -111,9 +111,6 @@ export class Game {
             Game.io.to(this.gameCode).emit('player-list', {
                 players: this.getCondensedPlayerList()
             });
-
-            console.log('updated player list');
-            console.table(this.getCondensedPlayerList());
         }
     }
 
@@ -181,9 +178,6 @@ export class Game {
 
             player.setGameCode(data.gameCode);
             game?.addPlayer(player);
-
-            console.log(`user ${player.id} joined game ${data.gameCode}`);
-            console.table(game?.getCondensedPlayerList());
 
             // Join the game's socket room
             player.socket.join(data.gameCode);

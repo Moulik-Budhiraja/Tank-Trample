@@ -119,6 +119,10 @@ export class Player {
      * @see https://en.wikipedia.org/wiki/Shoelace_formula
      */
     collidePoint(point: Position): boolean {
+        if (this.name == 'Player 2') {
+            console.log(this.bodyAngle);
+        }
+
         let points = this.getPoints();
 
         // Find area of quadrilateral by summing the areas of the 4 triangles
@@ -140,17 +144,15 @@ export class Player {
         for (let a = 0; a < 4; a++) {
             let b = (a + 1) % 4;
 
-            areaToPoint +=
+            areaToPoint += Math.abs(
                 (points[a].x - point.x) * (points[b].y - points[a].y) -
-                (points[a].x - points[b].x) * (point.y - points[a].y);
+                    (points[a].x - points[b].x) * (point.y - points[a].y)
+            );
         }
 
         areaToPoint = Math.abs(areaToPoint / 2);
 
         // Check if the point is in the player
-
-        console.log(points);
-        console.log(areaToPoint, area);
 
         return areaToPoint <= area;
     }

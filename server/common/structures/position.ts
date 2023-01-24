@@ -119,6 +119,8 @@ export class Position {
         let dx = this.x - x;
         let dy = this.y - y;
 
+        angle = (angle + 360) % 360;
+
         angle = (angle * Math.PI) / 180;
 
         this.x = x + dx * Math.cos(angle) - dy * Math.sin(angle);
