@@ -65,7 +65,7 @@ export class Round {
             player.sendUpdate();
         }
 
-        Game.io.to(this.gameCode).emit('roundStart', this.getCondensed());
+        Game.io.to(this.gameCode).emit('roundStart', this.getCondensed(true));
 
         this.updateInterval = setInterval(() => {
             // Update projectiles
@@ -122,11 +122,14 @@ export class Round {
                     player.turretAngle = event.turretAngle;
 
                     // SHOOT EVENT
-                } else if (event.type === 'shoot' && this.projectiles.length < 5) {
+                } else if (
+                    event.type === 'shoot' &&
+                    this.projectiles.length < 5
+                ) {
                     this.projectiles.push(
                         new Projectile(
                             Position.fromCondensed(event.position),
-                            Velocity.fromAngle(event.turretAngle, 200),
+                            Velocity.fromAngle(event.turretAngle, 100),
                             player.id
                         )
                     );
@@ -135,7 +138,7 @@ export class Round {
         });
     }
 
-    getCondensed(): CondensedRound {
+    getCondensed(withMap: boolean = false): CondensedRound {
         return {
             gameCode: this.gameCode,
             roundNumber: this.roundNumber,
@@ -143,7 +146,7 @@ export class Round {
                 projectile.getCondensed()
             ),
             players: this.players.map((player) => player.getCondensed()),
-            map: this.map.generateSVG()
+            map: withMap ? this.map.getCondensed() : null
         };
     }
 

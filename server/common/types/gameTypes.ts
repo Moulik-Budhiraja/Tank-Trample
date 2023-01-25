@@ -1,5 +1,6 @@
 import { Map } from '../structures/map';
 import { Projectile } from '../structures/projectiles';
+import { CondensedMap } from './mapTypes';
 import { CondensedPlayer } from './playerTypes';
 import { CondensedPosition } from './positionTypes';
 import { CondensedProjectile } from './projectileTypes';
@@ -17,7 +18,7 @@ export type CondensedRound = {
     roundNumber: number;
     projectiles: CondensedProjectile[];
     players: CondensedPlayer[];
-    map: string | null;
+    map: CondensedMap | null;
 };
 
 export type MoveEvent = {

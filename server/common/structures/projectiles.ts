@@ -8,7 +8,7 @@ export class Projectile {
     velocity: Velocity;
     ownerId: string;
     // collision: boolean = true;
-    lifeTime: number = 10000;
+    lifeTime: number = 15000;
     timeFired: number = NaN;
 
     constructor(position: Position, velocity: Velocity, ownerId: string) {
@@ -23,10 +23,26 @@ export class Projectile {
         this.timeFired = Date.now();
     }
 
-
     // ! NEEDS WORK
     update(map: Map) {
         this.position.updateByVelocity(this.velocity);
+
+        if (this.position.x < 0) {
+            this.position.x = 0;
+            this.velocity.x *= -1;
+        }
+        if (this.position.y < 0) {
+            this.position.y = 0;
+            this.velocity.y *= -1;
+        }
+        if (this.position.x > map.width * map.scale) {
+            this.position.x = map.width * map.scale;
+            this.velocity.x *= -1;
+        }
+        if (this.position.y > map.height * map.scale) {
+            this.position.y = map.height * map.scale;
+            this.velocity.y *= -1;
+        }
     }
 
     getCondensed(): CondensedProjectile {

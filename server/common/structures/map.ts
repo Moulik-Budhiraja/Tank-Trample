@@ -1,9 +1,12 @@
 import { Position } from './position';
+import { CondensedMap, CondensedMapNode } from '../types/mapTypes';
 
 /**
  * Represents a node in a maze
  *
  * @param id The id of the node
+ * @param x The x position of the node
+ * @param y The y position of the node
  */
 export class MapNode {
     id: number;
@@ -17,6 +20,28 @@ export class MapNode {
         this.connected = [];
 
         this.position = new Position(x, y);
+    }
+
+    getCondensed(): CondensedMapNode {
+        let connected = {
+            left: false,
+            right: false,
+            up: false,
+            down: false
+        };
+
+        for (let node of this.connected) {
+            if (node.position.x < this.position.x) connected.left = true;
+            if (node.position.x > this.position.x) connected.right = true;
+            if (node.position.y < this.position.y) connected.up = true;
+            if (node.position.y > this.position.y) connected.down = true;
+        }
+
+        return {
+            id: this.id,
+            position: this.position.getCondensed(),
+            connected: connected
+        };
     }
 }
 
@@ -283,5 +308,17 @@ export class Map {
         if (h1 < y2 && y2 < h2 && oldPos.x < v2 && v2 < newPos.x) {
             return new Position(v2, y2);
         }
+    }
+
+    getCondensed(): CondensedMap {
+        return {
+            width: this.width,
+            height: this.height,
+            scale: this.scale,
+            nodes: this.nodes.map((row) =>
+                row.map((node) => node.getCondensed())
+            ),
+            mapData: this.generateSVG()
+        };
     }
 }
