@@ -256,7 +256,7 @@ export class Map {
      * @param pos A position on the map
      * @returns MapNode The node that the position is in
      */
-    getNodeFromPos(pos: Position) {
+    getNodeFromPos(pos: Position): MapNode | null {
         if (pos.x < 0 || pos.x >= this.width * this.scale) return null;
         if (pos.y < 0 || pos.y >= this.height * this.scale) return null;
         return this.nodes[Math.floor(pos.y / this.scale)][
@@ -278,9 +278,7 @@ export class Map {
         let oldNode = this.getNodeFromPos(oldPos);
         let newNode = this.getNodeFromPos(newPos);
         if (!oldNode || !newNode) {
-            
-        }
-        else if (oldNode.connected.includes(newNode) || oldNode === newNode) {
+        } else if (oldNode.connected.includes(newNode) || oldNode === newNode) {
             return newPos;
         }
 

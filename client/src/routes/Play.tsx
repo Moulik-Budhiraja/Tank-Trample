@@ -19,7 +19,7 @@ const keys = {
   d: false
 };
 
-const myPosition: CondensedPosition = { x: 150, y: 50 };
+const myPosition: CondensedPosition = { x: 150, y: 50, lastUpdated: 0 };
 let myBodyAngle: number = 0;
 let myTurretAngle: number = 0;
 let myEvents: GameEvent[] = [];
@@ -45,7 +45,6 @@ function newMoveEvent(
     existingMoveEvent.position = position;
     existingMoveEvent.bodyAngle = bodyAngle;
     existingMoveEvent.turretAngle = turretAngle;
-
   } else {
     const newMoveEvent: GameEvent = {
       type: 'move',
@@ -97,7 +96,7 @@ export function Play() {
 
   const [projectiles, setProjectiles] = useState<CondensedProjectile[]>([]);
 
-  const VELOCITY = 2.5;
+  const VELOCITY = 100;
 
   type keyTypes = 'w' | 'a' | 's' | 'd';
 
@@ -116,25 +115,26 @@ export function Play() {
   function handleMove() {
     // Use last move and keys to determine new move
 
+    let lastUpdated = myPosition.lastUpdated || 0;
+
     if (keys.w) {
-      setPos((prevPos) => ({ ...prevPos, y: prevPos.y - VELOCITY }));
-      myPosition.y -= VELOCITY;
+      myPosition.y += (VELOCITY * (lastUpdated - Date.now())) / 1000;
     }
 
     if (keys.a) {
-      setPos((prevPos) => ({ ...prevPos, x: prevPos.x - VELOCITY }));
-      myPosition.x -= VELOCITY;
+      myPosition.x += (VELOCITY * (lastUpdated - Date.now())) / 1000;
     }
 
     if (keys.s) {
-      setPos((prevPos) => ({ ...prevPos, y: prevPos.y + VELOCITY }));
-      myPosition.y += VELOCITY;
+      myPosition.y -= (VELOCITY * (lastUpdated - Date.now())) / 1000;
     }
 
     if (keys.d) {
-      setPos((prevPos) => ({ ...prevPos, x: prevPos.x + VELOCITY }));
-      myPosition.x += VELOCITY;
+      myPosition.x -= (VELOCITY * (lastUpdated - Date.now())) / 1000;
     }
+
+    setPos(myPosition);
+    myPosition.lastUpdated = Date.now();
 
     let targetRotation: number;
 
@@ -155,8 +155,11 @@ export function Play() {
     } else if (keys.d) {
       targetRotation = 90;
     } else {
-      targetRotation = bodyRotation;
+      targetRotation = myBodyAngle;
+      console.log(`Reverting to ${myBodyAngle}`);
     }
+
+    console.log(targetRotation);
 
     myBodyAngle = targetRotation;
 
