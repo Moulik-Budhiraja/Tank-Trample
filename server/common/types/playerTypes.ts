@@ -12,4 +12,7 @@ export type CondensedPlayer = {
     position: CondensedPosition;
     bodyAngle: number;
     turretAngle: number;
+    width: number;
+    height: number;
+    alive: boolean;
 };
