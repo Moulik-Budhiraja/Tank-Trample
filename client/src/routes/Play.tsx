@@ -131,28 +131,32 @@ export function Play() {
     if (keys.w) {
       dy += (VELOCITY * (lastUpdated - Date.now())) / 1000;
 
-      if (newPosition.y < PLAYER_HEIGHT / 2) newPosition.y = PLAYER_HEIGHT / 2;
+      if (myPosition.y + dy < PLAYER_HEIGHT / 2) {
+        dy -= (VELOCITY * (lastUpdated - Date.now())) / 1000;
+      }
     }
 
     if (keys.a) {
       dx += (VELOCITY * (lastUpdated - Date.now())) / 1000;
-
-      if (newPosition.x < PLAYER_WIDTH / 2) newPosition.x = PLAYER_WIDTH / 2;
+      
+      if (myPosition.x + dx < PLAYER_WIDTH / 2) {
+        dx -= (VELOCITY * (lastUpdated - Date.now())) / 1000;
+      }
     }
 
     if (keys.s) {
       dy -= (VELOCITY * (lastUpdated - Date.now())) / 1000;
 
-      if (newPosition.y > map.height * map.scale - PLAYER_HEIGHT / 2) {
-        newPosition.y = map.height * map.scale - PLAYER_HEIGHT / 2;
+      if (myPosition.y + dy > map.height * map.scale - PLAYER_HEIGHT / 2) {
+        dy += (VELOCITY * (lastUpdated - Date.now())) / 1000;
       }
     }
 
     if (keys.d) {
       dx -= (VELOCITY * (lastUpdated - Date.now())) / 1000;
 
-      if (newPosition.x > map.width * map.scale - PLAYER_WIDTH / 2) {
-        newPosition.x = map.width * map.scale - PLAYER_WIDTH / 2;
+      if (myPosition.x + dx > map.width * map.scale - PLAYER_WIDTH / 2) {
+        dx += (VELOCITY * (lastUpdated - Date.now())) / 1000;
       }
     }
 
