@@ -65,7 +65,7 @@ export class Round {
             player.sendUpdate();
         }
 
-        Game.io.to(this.gameCode).emit('roundStart', this.getCondensed());
+        Game.io.to(this.gameCode).emit('roundStart', this.getCondensed(true));
 
         this.updateInterval = setInterval(() => {
             // Update projectiles
@@ -113,7 +113,7 @@ export class Round {
         });
     }
 
-    getCondensed(): CondensedRound {
+    getCondensed(withMap: boolean = false): CondensedRound {
         return {
             gameCode: this.gameCode,
             roundNumber: this.roundNumber,
@@ -121,7 +121,7 @@ export class Round {
                 projectile.getCondensed()
             ),
             players: this.players.map((player) => player.getCondensed()),
-            map: this.map.generateSVG()
+            map: withMap ? this.map.getCondensed() : null
         };
     }
 

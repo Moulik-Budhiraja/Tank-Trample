@@ -243,8 +243,8 @@ export function Play() {
     socket.on('roundStart', (data: CondensedRound) => {
       setPlayers(data.players);
       if (data.map) {
-        persistentMapData = data.map;
-        setMapData(data.map);
+        persistentMapData = data.map.mapData;
+        setMapData(data.map.mapData);
       }
     });
 
@@ -255,6 +255,9 @@ export function Play() {
 
     socket.on('player-update', (data: CondensedPlayer) => {
       playerId = data.id;
+      setPos(data.position);
+      myPosition.x = data.position.x;
+      myPosition.y = data.position.y;
     });
   }, []);
 
