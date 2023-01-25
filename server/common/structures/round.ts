@@ -83,6 +83,7 @@ export class Round {
 
                 // Check if the projectile hit a player
                 for (let player of this.players) {
+                    if (!player.alive) continue;
                     if (player.collidePoint(projectile.position)) {
                         player.alive = false;
 
@@ -135,7 +136,10 @@ export class Round {
                     // SHOOT EVENT
                 } else if (
                     event.type === 'shoot' &&
-                    this.projectiles.length < 5
+                    this.projectiles.filter((projectile) => {
+                        return projectile.ownerId === player.id;
+                    }).length < 5 &&
+                    player.alive
                 ) {
                     this.projectiles.push(
                         new Projectile(
