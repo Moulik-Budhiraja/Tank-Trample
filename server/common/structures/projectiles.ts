@@ -7,8 +7,8 @@ export class Projectile {
     position: Position;
     velocity: Velocity;
     ownerId: string;
-    collision: boolean = true;
-    lifeTime: number = 5000;
+    // collision: boolean = true;
+    lifeTime: number = 10000;
     timeFired: number = NaN;
 
     constructor(position: Position, velocity: Velocity, ownerId: string) {
@@ -23,8 +23,9 @@ export class Projectile {
         this.timeFired = Date.now();
     }
 
+
     // ! NEEDS WORK
-    update() {
+    update(map: Map) {
         this.position.updateByVelocity(this.velocity);
     }
 

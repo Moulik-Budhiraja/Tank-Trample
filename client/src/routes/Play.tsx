@@ -109,7 +109,7 @@ export function Play() {
 
   const [projectiles, setProjectiles] = useState<CondensedProjectile[]>([]);
 
-  const VELOCITY = 3;
+  const VELOCITY = 2.5;
 
   type keyTypes = 'w' | 'a' | 's' | 'd';
 
@@ -260,7 +260,7 @@ export function Play() {
       myPosition.y = data.position.y;
     });
   }, []);
-
+  console.log(mapData);
   return (
     <>
       <div
