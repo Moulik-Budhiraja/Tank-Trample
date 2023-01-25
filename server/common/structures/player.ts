@@ -20,6 +20,7 @@ export class Player {
     width: number = 35;
     height: number = 35;
     alive: boolean = true;
+    score: number = 0;
 
     constructor(socket: Socket) {
         this.socket = socket;
@@ -88,7 +89,8 @@ export class Player {
             turretAngle: this.turretAngle,
             width: this.width,
             height: this.height,
-            alive: this.alive
+            alive: this.alive,
+            score: this.score
         };
     }
 
@@ -119,7 +121,6 @@ export class Player {
      * @see https://en.wikipedia.org/wiki/Shoelace_formula
      */
     collidePoint(point: Position): boolean {
-
         let points = this.getPoints();
 
         // Find area of quadrilateral by summing the areas of the 4 triangles

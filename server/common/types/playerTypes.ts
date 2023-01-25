@@ -15,4 +15,5 @@ export type CondensedPlayer = {
     width: number;
     height: number;
     alive: boolean;
+    score: number;
 };

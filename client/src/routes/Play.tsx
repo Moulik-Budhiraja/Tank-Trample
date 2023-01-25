@@ -13,6 +13,7 @@ import { CondensedProjectile } from '../../../server/common/types/projectileType
 import { Bullet } from '../components/bullet';
 import { CondensedMap } from '../../../server/common/types/mapTypes';
 import { PLAYER_WIDTH, PLAYER_HEIGHT } from '../config';
+import { ScoreBoard } from '../components/scoreBoard';
 
 const keys = {
   w: false,
@@ -126,8 +127,8 @@ export function Play() {
     let lastUpdated = myPosition.lastUpdated || 0;
 
     let newPosition = { ...myPosition };
-    let dx = 0; 
-    let dy = 0; 
+    let dx = 0;
+    let dy = 0;
     if (keys.w) {
       dy += (VELOCITY * (lastUpdated - Date.now())) / 1000;
 
@@ -138,7 +139,7 @@ export function Play() {
 
     if (keys.a) {
       dx += (VELOCITY * (lastUpdated - Date.now())) / 1000;
-      
+
       if (myPosition.x + dx < PLAYER_WIDTH / 2) {
         dx -= (VELOCITY * (lastUpdated - Date.now())) / 1000;
       }
@@ -360,6 +361,7 @@ export function Play() {
         >
           <PingTracker></PingTracker>
         </div>
+        <ScoreBoard players={players}></ScoreBoard>
       </div>
     </>
   );

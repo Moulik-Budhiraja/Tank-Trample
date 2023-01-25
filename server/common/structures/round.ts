@@ -174,6 +174,12 @@ export class Round {
             clearTimeout(this.endRoundTimeout);
         }
 
+        // If theres only on player left, give them a point
+        let playersAlive = this.players.filter((player) => player.alive);
+        if (playersAlive.length == 1) {
+            playersAlive[0].score++;
+        }
+
         // remove socket listeners
         for (let player of this.players) {
             player.socket.removeAllListeners('events');
