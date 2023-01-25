@@ -100,11 +100,14 @@ export class Round {
                     player.turretAngle = event.turretAngle;
 
                     // SHOOT EVENT
-                } else if (event.type === 'shoot' && this.projectiles.length < 5) {
+                } else if (
+                    event.type === 'shoot' &&
+                    this.projectiles.length < 5
+                ) {
                     this.projectiles.push(
                         new Projectile(
                             Position.fromCondensed(event.position),
-                            Velocity.fromAngle(event.turretAngle, 200),
+                            Velocity.fromAngle(event.turretAngle, 100),
                             player.id
                         )
                     );
