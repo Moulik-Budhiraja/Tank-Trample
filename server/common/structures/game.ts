@@ -115,6 +115,21 @@ export class Game {
     }
 
     /**
+     * Ends the current round and starts a new one
+     *
+     * @param roundNumber The round number to start
+     * @see Round.endRound()
+     */
+    newRound(roundNumber: number) {
+        this.currentRound.endRound();
+        this.currentRound = new Round(
+            this.gameCode,
+            this.playerList,
+            roundNumber
+        );
+    }
+
+    /**
      * Checks if a game code is already taken
      * by another game
      *

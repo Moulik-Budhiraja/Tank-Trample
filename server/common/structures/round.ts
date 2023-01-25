@@ -19,6 +19,7 @@ export class Round {
     roundNumber: number;
     map: Map;
     updateInterval: NodeJS.Timeout | null = null;
+    endRoundTimeout: NodeJS.Timeout | null = null;
 
     constructor(gameCode: string, players: Player[], roundNumber: number) {
         this.gameCode = gameCode;
@@ -93,6 +94,25 @@ export class Round {
                 }
             }
 
+            // Check if all players are dead
+            let playersAlive = this.players.filter(
+                (player) => player.alive
+            ).length;
+
+            if (playersAlive == 0) {
+                Game.getGameByCode(this.gameCode)?.newRound(
+                    this.roundNumber + 1
+                );
+            } else if (playersAlive == 1) {
+                if (this.endRoundTimeout === null) {
+                    this.endRoundTimeout = setTimeout(() => {
+                        Game.getGameByCode(this.gameCode)?.newRound(
+                            this.roundNumber + 1
+                        );
+                    }, 5000);
+                }
+            }
+
             Game.io
                 .to(this.gameCode)
                 .emit('roundUpdate', { ...this.getCondensed(), map: null });
@@ -120,7 +140,7 @@ export class Round {
                     this.projectiles.push(
                         new Projectile(
                             Position.fromCondensed(event.position),
-                            Velocity.fromAngle(event.turretAngle, 100),
+                            Velocity.fromAngle(event.turretAngle, 120),
                             player.id
                         )
                     );
@@ -144,6 +164,10 @@ export class Round {
     endRound() {
         if (this.updateInterval) {
             clearInterval(this.updateInterval);
+        }
+
+        if (this.endRoundTimeout) {
+            clearTimeout(this.endRoundTimeout);
         }
 
         // remove socket listeners

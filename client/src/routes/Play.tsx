@@ -11,6 +11,8 @@ import { UPDATE_INTERVAL } from '../config';
 import { PingTracker } from '../components/pingTracker';
 import { CondensedProjectile } from '../../../server/common/types/projectileTypes';
 import { Bullet } from '../components/bullet';
+import { CondensedMap } from '../../../server/common/types/mapTypes';
+import { PLAYER_WIDTH, PLAYER_HEIGHT } from '../config';
 
 const keys = {
   w: false,
@@ -25,7 +27,13 @@ let myTurretAngle: number = 0;
 let myEvents: GameEvent[] = [];
 let lastPost: number = 0;
 
-let persistentMapData = '';
+let persistentMap: CondensedMap = {
+  width: 0,
+  height: 0,
+  nodes: [],
+  scale: 0,
+  mapData: ''
+};
 
 let playerId: string;
 
@@ -90,7 +98,7 @@ export function Play() {
   const [bodyRotation, setBodyRotation] = useState(0);
   const [turretRotation, setTurretRotation] = useState(0);
 
-  const [mapData, setMapData] = useState(persistentMapData);
+  const [map, setMap] = useState(persistentMap);
 
   const [players, setPlayers] = useState<CondensedPlayer[]>([]);
 
@@ -119,18 +127,30 @@ export function Play() {
 
     if (keys.w) {
       myPosition.y += (VELOCITY * (lastUpdated - Date.now())) / 1000;
+
+      if (myPosition.y < PLAYER_HEIGHT / 2) myPosition.y = PLAYER_HEIGHT / 2;
     }
 
     if (keys.a) {
       myPosition.x += (VELOCITY * (lastUpdated - Date.now())) / 1000;
+
+      if (myPosition.x < PLAYER_WIDTH / 2) myPosition.x = PLAYER_WIDTH / 2;
     }
 
     if (keys.s) {
       myPosition.y -= (VELOCITY * (lastUpdated - Date.now())) / 1000;
+
+      if (myPosition.y > map.height * map.scale - PLAYER_HEIGHT / 2) {
+        myPosition.y = map.height * map.scale - PLAYER_HEIGHT / 2;
+      }
     }
 
     if (keys.d) {
       myPosition.x -= (VELOCITY * (lastUpdated - Date.now())) / 1000;
+
+      if (myPosition.x > map.width * map.scale - PLAYER_WIDTH / 2) {
+        myPosition.x = map.width * map.scale - PLAYER_WIDTH / 2;
+      }
     }
 
     setPos(myPosition);
@@ -195,10 +215,12 @@ export function Play() {
       {
         x:
           myPosition.x +
-          Math.cos((myTurretAngle - 90) * (Math.PI / 180)) * (35 / 1.2),
+          Math.cos((myTurretAngle - 90) * (Math.PI / 180)) *
+            (PLAYER_WIDTH / 1.2),
         y:
           myPosition.y +
-          Math.sin((myTurretAngle - 90) * (Math.PI / 180)) * (35 / 1.2)
+          Math.sin((myTurretAngle - 90) * (Math.PI / 180)) *
+            (PLAYER_HEIGHT / 1.2)
       },
       myBodyAngle,
       myTurretAngle - 90
@@ -227,8 +249,8 @@ export function Play() {
     socket.on('roundStart', (data: CondensedRound) => {
       setPlayers(data.players);
       if (data.map) {
-        persistentMapData = data.map.mapData;
-        setMapData(data.map.mapData);
+        persistentMap = data.map;
+        setMap(data.map);
       }
     });
 
@@ -276,7 +298,7 @@ export function Play() {
               left: '0'
             }}
           >
-            <path d={mapData} strokeWidth="3" stroke="black" fill="none"></path>
+            <path d={''} strokeWidth="3" stroke="black" fill="none"></path>
           </svg>
 
           {/* RENDER ALL TANKS, AND SELF AS SHADOW */}
@@ -289,8 +311,8 @@ export function Play() {
                   name={player.name}
                   key={player.id}
                   pos={player.position}
-                  width={35}
-                  height={35}
+                  width={PLAYER_WIDTH}
+                  height={PLAYER_HEIGHT}
                   bodyRotation={player.bodyAngle}
                   turretRotation={player.turretAngle}
                   ghost={true}
@@ -302,21 +324,23 @@ export function Play() {
                 name={player.name}
                 key={player.id}
                 pos={player.position}
-                width={35}
-                height={35}
+                width={PLAYER_WIDTH}
+                height={PLAYER_HEIGHT}
                 bodyRotation={player.bodyAngle}
                 turretRotation={player.turretAngle}
               />
             );
           })}
-          <Tank
-            name={'You'}
-            pos={pos}
-            width={35}
-            height={35}
-            bodyRotation={bodyRotation}
-            turretRotation={turretRotation}
-          />
+          {players.find((player) => player.id === playerId)?.alive && (
+            <Tank
+              name={'You'}
+              pos={pos}
+              width={PLAYER_WIDTH}
+              height={PLAYER_HEIGHT}
+              bodyRotation={bodyRotation}
+              turretRotation={turretRotation}
+            />
+          )}
 
           {/* RENDER ALL PROJECTILES */}
           {projectiles.map((projectile) => {
