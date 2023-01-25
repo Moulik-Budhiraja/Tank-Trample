@@ -46,8 +46,6 @@ function newMoveEvent(
     existingMoveEvent.bodyAngle = bodyAngle;
     existingMoveEvent.turretAngle = turretAngle;
 
-    // console.log('updated move event');
-    // console.table(existingMoveEvent);
   } else {
     const newMoveEvent: GameEvent = {
       type: 'move',
@@ -107,19 +105,12 @@ export function Play() {
     if (e.key in keys) {
       keys[e.key as keyTypes] = true;
     }
-
-    // console.log(e.key, 'Down');
-
-    // console.table(keys);
   }
 
   function handleKeyUp(e: KeyboardEvent) {
     if (e.key in keys) {
       keys[e.key as keyTypes] = false;
     }
-
-    // console.log(e.key, 'Up');
-    // console.table(keys);
   }
 
   function handleMove() {
@@ -250,7 +241,6 @@ export function Play() {
       myPosition.y = data.position.y;
     });
   }, []);
-  console.log(mapData);
   return (
     <>
       <div

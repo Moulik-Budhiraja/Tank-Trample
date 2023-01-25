@@ -119,9 +119,6 @@ export class Player {
      * @see https://en.wikipedia.org/wiki/Shoelace_formula
      */
     collidePoint(point: Position): boolean {
-        if (this.name == 'Player 2') {
-            console.log(this.bodyAngle);
-        }
 
         let points = this.getPoints();
 
@@ -152,8 +149,6 @@ export class Player {
 
         areaToPoint = Math.abs(areaToPoint / 2);
 
-        // Check if the point is in the player
-
-        return areaToPoint <= area;
+        return Math.abs(areaToPoint - area) < 1;
     }
 }
