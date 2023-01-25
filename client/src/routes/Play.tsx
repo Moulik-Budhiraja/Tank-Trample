@@ -126,21 +126,22 @@ export function Play() {
     let lastUpdated = myPosition.lastUpdated || 0;
 
     let newPosition = { ...myPosition };
-
+    let dx = 0; 
+    let dy = 0; 
     if (keys.w) {
-      newPosition.y += (VELOCITY * (lastUpdated - Date.now())) / 1000;
+      dy += (VELOCITY * (lastUpdated - Date.now())) / 1000;
 
       if (newPosition.y < PLAYER_HEIGHT / 2) newPosition.y = PLAYER_HEIGHT / 2;
     }
 
     if (keys.a) {
-      newPosition.x += (VELOCITY * (lastUpdated - Date.now())) / 1000;
+      dx += (VELOCITY * (lastUpdated - Date.now())) / 1000;
 
       if (newPosition.x < PLAYER_WIDTH / 2) newPosition.x = PLAYER_WIDTH / 2;
     }
 
     if (keys.s) {
-      newPosition.y -= (VELOCITY * (lastUpdated - Date.now())) / 1000;
+      dy -= (VELOCITY * (lastUpdated - Date.now())) / 1000;
 
       if (newPosition.y > map.height * map.scale - PLAYER_HEIGHT / 2) {
         newPosition.y = map.height * map.scale - PLAYER_HEIGHT / 2;
@@ -148,44 +149,27 @@ export function Play() {
     }
 
     if (keys.d) {
-      newPosition.x -= (VELOCITY * (lastUpdated - Date.now())) / 1000;
+      dx -= (VELOCITY * (lastUpdated - Date.now())) / 1000;
 
       if (newPosition.x > map.width * map.scale - PLAYER_WIDTH / 2) {
         newPosition.x = map.width * map.scale - PLAYER_WIDTH / 2;
       }
     }
 
-    if (newPosition.x !== myPosition.x && newPosition.y !== myPosition.y) {
-      newPosition.x -= (newPosition.x - myPosition.x) * (Math.sqrt(2) - 1);
-      newPosition.y -= (newPosition.y - myPosition.y) * (Math.sqrt(2) - 1);
+    if (dx !== 0 || dy !== 0) {
+      dx /= Math.sqrt(2);
+      dy /= Math.sqrt(2);
     }
 
-    console.log(newPosition.x - myPosition.x, newPosition.y - myPosition.y);
-
-    myPosition.x = newPosition.x;
-    myPosition.y = newPosition.y;
+    myPosition.x += dx;
+    myPosition.y += dy;
 
     setPos(myPosition);
     myPosition.lastUpdated = Date.now();
 
     let targetRotation: number;
-
-    if (keys.w && keys.a) {
-      targetRotation = 315;
-    } else if (keys.w && keys.d) {
-      targetRotation = 45;
-    } else if (keys.s && keys.a) {
-      targetRotation = 225;
-    } else if (keys.s && keys.d) {
-      targetRotation = 135;
-    } else if (keys.w) {
-      targetRotation = 0;
-    } else if (keys.a) {
-      targetRotation = 270;
-    } else if (keys.s) {
-      targetRotation = 180;
-    } else if (keys.d) {
-      targetRotation = 90;
+    if (dy || dx) {
+      targetRotation = Math.atan2(dy, dx) * (180 / Math.PI) + 90;
     } else {
       targetRotation = myBodyAngle;
     }
