@@ -125,33 +125,45 @@ export function Play() {
 
     let lastUpdated = myPosition.lastUpdated || 0;
 
-    if (keys.w) {
-      myPosition.y += (VELOCITY * (lastUpdated - Date.now())) / 1000;
+    let newPosition = { ...myPosition };
 
-      if (myPosition.y < PLAYER_HEIGHT / 2) myPosition.y = PLAYER_HEIGHT / 2;
+    if (keys.w) {
+      newPosition.y += (VELOCITY * (lastUpdated - Date.now())) / 1000;
+
+      if (newPosition.y < PLAYER_HEIGHT / 2) newPosition.y = PLAYER_HEIGHT / 2;
     }
 
     if (keys.a) {
-      myPosition.x += (VELOCITY * (lastUpdated - Date.now())) / 1000;
+      newPosition.x += (VELOCITY * (lastUpdated - Date.now())) / 1000;
 
-      if (myPosition.x < PLAYER_WIDTH / 2) myPosition.x = PLAYER_WIDTH / 2;
+      if (newPosition.x < PLAYER_WIDTH / 2) newPosition.x = PLAYER_WIDTH / 2;
     }
 
     if (keys.s) {
-      myPosition.y -= (VELOCITY * (lastUpdated - Date.now())) / 1000;
+      newPosition.y -= (VELOCITY * (lastUpdated - Date.now())) / 1000;
 
-      if (myPosition.y > map.height * map.scale - PLAYER_HEIGHT / 2) {
-        myPosition.y = map.height * map.scale - PLAYER_HEIGHT / 2;
+      if (newPosition.y > map.height * map.scale - PLAYER_HEIGHT / 2) {
+        newPosition.y = map.height * map.scale - PLAYER_HEIGHT / 2;
       }
     }
 
     if (keys.d) {
-      myPosition.x -= (VELOCITY * (lastUpdated - Date.now())) / 1000;
+      newPosition.x -= (VELOCITY * (lastUpdated - Date.now())) / 1000;
 
-      if (myPosition.x > map.width * map.scale - PLAYER_WIDTH / 2) {
-        myPosition.x = map.width * map.scale - PLAYER_WIDTH / 2;
+      if (newPosition.x > map.width * map.scale - PLAYER_WIDTH / 2) {
+        newPosition.x = map.width * map.scale - PLAYER_WIDTH / 2;
       }
     }
+
+    if (newPosition.x !== myPosition.x && newPosition.y !== myPosition.y) {
+      newPosition.x -= (newPosition.x - myPosition.x) * (Math.sqrt(2) - 1);
+      newPosition.y -= (newPosition.y - myPosition.y) * (Math.sqrt(2) - 1);
+    }
+
+    console.log(newPosition.x - myPosition.x, newPosition.y - myPosition.y);
+
+    myPosition.x = newPosition.x;
+    myPosition.y = newPosition.y;
 
     setPos(myPosition);
     myPosition.lastUpdated = Date.now();
@@ -176,10 +188,7 @@ export function Play() {
       targetRotation = 90;
     } else {
       targetRotation = myBodyAngle;
-      console.log(`Reverting to ${myBodyAngle}`);
     }
-
-    console.log(targetRotation);
 
     myBodyAngle = targetRotation;
 
