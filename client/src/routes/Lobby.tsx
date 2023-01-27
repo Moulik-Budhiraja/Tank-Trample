@@ -146,12 +146,7 @@ export function Lobby() {
               </p>
             )}
           </div>
-          <div
-            style={{
-              position: 'relative',
-              bottom: '3rem'
-            }}
-          >
+          <div>
             <GenericPlayerList players={players}></GenericPlayerList>
           </div>
         </div>
