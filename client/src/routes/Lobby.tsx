@@ -58,6 +58,10 @@ export function Lobby() {
   }, [searchParams.get(gameCode)]);
 
   function updateInputName(event: React.ChangeEvent<HTMLInputElement>) {
+    if (event.currentTarget.value.length > 32) {
+      event.currentTarget.value = event.currentTarget.value.slice(0, 32);
+      return;
+    }
     setName(event.currentTarget.value);
   }
 
