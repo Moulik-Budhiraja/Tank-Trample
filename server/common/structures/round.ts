@@ -153,6 +153,12 @@ export class Round {
         });
     }
 
+    /**
+     * Returns a condensed version of the round. This is used for sending data to the client.
+     *
+     * @param withMap - Whether to include the map or not.
+     * @return The condensed round.
+     */
     getCondensed(withMap: boolean = false): CondensedRound {
         return {
             gameCode: this.gameCode,

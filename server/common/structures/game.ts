@@ -74,6 +74,11 @@ export class Game {
             this.playerList[0].host = true;
             this.playerList[0].sendUpdate();
         }
+
+        if (this.playerList.length === 0) {
+            this.currentRound.endRound();
+            Game.games = Game.games.filter((g) => g.gameCode !== this.gameCode);
+        }
     }
 
     /**
@@ -172,7 +177,7 @@ export class Game {
         player.socket.on('validate-game-code', (data: GameValidation) => {
             player.socket.emit('game-code-valid', {
                 gameCode: data.gameCode,
-                valid: this.getGameByCode(data.gameCode) !== undefined
+                valid: this.getGameByCode(data.gameCode) !== null
             });
         });
 
