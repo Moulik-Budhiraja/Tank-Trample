@@ -1,0 +1,4 @@
+.join-lobby {
+  display: grid;
+  grid-template-columns: 6fr 4fr;
+}

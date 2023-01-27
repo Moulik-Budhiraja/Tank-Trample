@@ -2,7 +2,6 @@ import { socket } from '../service/socket';
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { GameValidation } from '../../../server/common/types/gameTypes';
-import { InvalidGameCode } from '../components/errorMessages';
 import { GenericPlayerList } from '../components/playerLists';
 import { CondensedPlayer } from '../../../server/common/types/playerTypes';
 import { PingTracker } from '../components/pingTracker';
@@ -89,7 +88,17 @@ export function Lobby() {
 
   return (
     <>
-      <h1 style={{ textAlign: 'center' }}>Lobby</h1>
+      <h1
+        style={{
+          textAlign: 'center',
+          fontFamily: 'permanent marker',
+          fontSize: 'clamp(2rem, 10vw, 5rem)',
+          whiteSpace: 'nowrap',
+          color: 'red'
+        }}
+      >
+        Lobby
+      </h1>
 
       <div
         style={{
@@ -104,26 +113,49 @@ export function Lobby() {
             flexDirection: 'row',
             justifyContent: 'center',
             alignItems: 'center',
-            gap: '40px',
-            height: '60vh'
+            gap: '1rem',
+            height: '50vh'
           }}
         >
           <div>
             <p>Game Code: {gameCode}</p>
             <p>Current Name: {myName}</p>
-            <input
-              id="setName"
-              onChange={updateInputName}
-              onKeyDown={updateName}
-              type="text"
-              placeholder="Set Name"
-            />
-            <button onClick={updateName}>Update</button>
-            <InvalidGameCode gameCodeError={gameCodeError}></InvalidGameCode>
+            <span className="join-lobby input-group" style={{ width: '70%' }}>
+              <input
+                id="setName"
+                onChange={updateInputName}
+                onKeyDown={updateName}
+                type="text"
+                placeholder="Set Name"
+                className="form-control"
+                style={{
+                  width: '100%'
+                }}
+              />
+              <button onClick={updateName} className="btn btn-success">
+                Update
+              </button>
+            </span>
+            {gameCodeError && (
+              <p style={{ color: 'red' }}>
+                Game code is invalid. Redirecting to home page...
+              </p>
+            )}
           </div>
-          <GenericPlayerList players={players}></GenericPlayerList>
+          <div
+            style={{
+              position: 'relative',
+              bottom: '3rem'
+            }}
+          >
+            <GenericPlayerList players={players}></GenericPlayerList>
+          </div>
         </div>
-        {isHost && <button onClick={startGame}>Start Game</button>}
+        {isHost && (
+          <button onClick={startGame} className="btn btn-primary">
+            Start Game
+          </button>
+        )}
 
         <br />
         <PingTracker></PingTracker>

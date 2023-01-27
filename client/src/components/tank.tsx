@@ -46,21 +46,23 @@ export function Tank(props: {
           opacity: tankOpacity
         }}
       >
-        <h4
-          style={{
-            position: 'absolute',
-            top: props.pos.y,
-            left: props.pos.x,
-            transform: `translate(-50%, ${-props.height - 25}px)`,
-            whiteSpace: 'nowrap',
-            maxWidth: `${props.width * 2.5}px`,
-            textOverflow: 'ellipsis',
-            overflow: 'hidden',
-            opacity: textOpacity
-          }}
-        >
-          {props.name}
-        </h4>
+        {props.name !== '' && (
+          <h6
+            style={{
+              position: 'absolute',
+              top: props.pos.y,
+              left: props.pos.x,
+              transform: `translate(-50%, ${-props.height - 12}px)`,
+              whiteSpace: 'nowrap',
+              maxWidth: `${props.width * 2.5}px`,
+              textOverflow: 'ellipsis',
+              overflow: 'hidden',
+              opacity: textOpacity
+            }}
+          >
+            {props.name}
+          </h6>
+        )}
         <div
           style={{
             width: props.width,
