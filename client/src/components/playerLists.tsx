@@ -29,7 +29,18 @@ export function GenericPlayerList({ players }: genericPlayerListProps) {
           }}
         >
           {players.map((player) => {
-            return <li key={player.id}>{player.name}</li>;
+            return (
+              <li
+                key={player.id}
+                style={{
+                  maxWidth: '10rem',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis'
+                }}
+              >
+                {player.name}
+              </li>
+            );
           })}
         </ul>
       </div>

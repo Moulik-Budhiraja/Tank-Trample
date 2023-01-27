@@ -18,13 +18,34 @@ export function ScoreBoard(props: { players: CondensedPlayer[] }) {
             padding: '0'
           }}
         >
-          {props.players.map((player) => {
-            return (
-              <li key={player.id}>
-                {player.name}: {player.score}
-              </li>
-            );
-          })}
+          {props.players
+            .sort((a, b) => {
+              return b.score - a.score;
+            })
+            .map((player) => {
+              return (
+                <li
+                  key={player.id}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center'
+                  }}
+                >
+                  <span
+                    style={{
+                      maxWidth: '7rem',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      display: 'inline-block'
+                    }}
+                  >
+                    {player.name}
+                  </span>
+                  <span>: {player.score}</span>
+                </li>
+              );
+            })}
         </ul>
       </div>
     </>
