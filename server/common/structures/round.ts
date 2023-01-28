@@ -1,7 +1,7 @@
 import { Map } from './map';
 import { Player } from './player';
 import { MapNode } from './map';
-import { Projectile } from './projectiles';
+import { AirBurst, LandMine, Lazar, Projectile, Rocket } from './projectiles';
 import { CondensedRound, GameEvent } from '../types/gameTypes';
 import { Game } from './game';
 import { Position, Velocity } from './position';
@@ -72,27 +72,7 @@ export class Round {
         this.updateInterval = setInterval(() => {
             // Update projectiles
             for (let projectile of this.projectiles) {
-                projectile.update(this.map);
-
-                if (projectile.timeFired + projectile.lifeTime < Date.now()) {
-                    this.projectiles.splice(
-                        this.projectiles.indexOf(projectile),
-                        1
-                    );
-                }
-
-                // Check if the projectile hit a player
-                for (let player of this.players) {
-                    if (!player.alive) continue;
-                    if (player.collidePoint(projectile.position)) {
-                        player.alive = false;
-
-                        this.projectiles.splice(
-                            this.projectiles.indexOf(projectile),
-                            1
-                        );
-                    }
-                }
+                projectile.update(this);
             }
 
             // Check if all players are dead
@@ -142,12 +122,13 @@ export class Round {
                     player.alive
                 ) {
                     this.projectiles.push(
-                        new Projectile(
+                        new player.projectileType(
                             Position.fromCondensed(event.position),
                             Velocity.fromAngle(event.turretAngle, 120),
                             player.id
                         )
                     );
+                    player.usedProjectile();
                 }
             }
         });

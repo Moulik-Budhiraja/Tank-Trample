@@ -344,6 +344,8 @@ export function Play() {
           {projectiles.map((projectile) => {
             return (
               <Bullet
+                width={projectile.width}
+                height={projectile.height}
                 key={projectile.id}
                 pos={projectile.pos}
                 vel={projectile.vel}
