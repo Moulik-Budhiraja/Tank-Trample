@@ -3,6 +3,8 @@ export type CondensedProjectile = {
     playerId: string;
     timeCreated: number;
     lifeTime: number;
+    width: number;
+    height: number;
     pos: {
         x: number;
         y: number;

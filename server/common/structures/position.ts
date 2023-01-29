@@ -141,6 +141,37 @@ export class Position {
     }
 
     /**
+     * Gets the distance between the position and the given x and y
+     *
+     * @param pos The position to get the distance to
+     *
+     * @returns The distance between the position and the given x and y
+     */
+    distanceTo(pos: Position) {
+        return Math.sqrt(
+            Math.pow(this.x - pos.x, 2) + Math.pow(this.y - pos.y, 2)
+        );
+    }
+
+    /**
+     * Gets the angle between the position and the given x and y
+     *
+     * @param pos The position to get the angle to
+     *
+     * @returns The angle between the position and the given x and y
+     */
+    angleTo(pos: Position) {
+        let dx = pos.x - this.x;
+        let dy = pos.y - this.y;
+
+        let angle = Math.atan2(dy, dx);
+
+        angle = (angle * 180) / Math.PI;
+
+        return angle;
+    }
+
+    /**
      * Gets the condensed version of the position
      *
      * @returns The condensed version of the position
@@ -212,7 +243,7 @@ export class Velocity {
      * @returns The angle component of the velocity
      */
     getAngle() {
-        return Math.atan2(this.y, this.x);
+        return Math.atan2(this.y, this.x) * (180 / Math.PI);
     }
 
     /**
@@ -223,6 +254,19 @@ export class Velocity {
      */
     setSpeed(speed: number) {
         let angle = this.getAngle();
+        angle = (angle * Math.PI) / 180;
+        this.x = speed * Math.cos(angle);
+        this.y = speed * Math.sin(angle);
+    }
+
+    /**
+     * Sets the angle component of the velocity
+     *
+     * @param angle The angle component of the velocity
+     */
+    setAngle(angle: number) {
+        angle = (angle * Math.PI) / 180;
+        let speed = this.getSpeed();
         this.x = speed * Math.cos(angle);
         this.y = speed * Math.sin(angle);
     }

@@ -2,6 +2,7 @@ import { Socket } from 'socket.io';
 import { Game } from './game';
 import { CondensedPlayer } from '../types/playerTypes';
 import { Position } from './position';
+import { Projectile, ProjectileTypes } from './projectiles';
 
 /**
  * Represents a player in the game
@@ -21,6 +22,8 @@ export class Player {
     height: number = 35;
     alive: boolean = true;
     score: number = 0;
+    projectileType = ProjectileTypes.BULLET;
+    projectileUses = 0;
 
     constructor(socket: Socket) {
         this.socket = socket;
@@ -110,6 +113,15 @@ export class Player {
         return points.map((point) =>
             point.rotate(this.position.x, this.position.y, this.bodyAngle)
         );
+    }
+
+    usedProjectile() {
+        this.projectileUses--;
+
+        if (this.projectileUses <= 0) {
+            this.projectileType = ProjectileTypes.BULLET;
+            this.projectileUses = 0;
+        }
     }
 
     /**
