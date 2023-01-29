@@ -22,8 +22,8 @@ export class Player {
     height: number = 35;
     alive: boolean = true;
     score: number = 0;
-    projectileType = ProjectileTypes.BULLET;
-    projectileUses = 0;
+    projectileType: any = ProjectileTypes.AIRBURST;
+    projectileUses = 3000;
 
     constructor(socket: Socket) {
         this.socket = socket;

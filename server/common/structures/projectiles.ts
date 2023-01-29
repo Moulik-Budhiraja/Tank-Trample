@@ -45,6 +45,21 @@ export class Projectile {
             round.projectiles.splice(round.projectiles.indexOf(this), 1);
         }
 
+        if (this.damage) {
+            // Check if the projectile hit a player
+            for (let player of round.players) {
+                if (!player.alive) continue;
+                if (player.collidePoint(this.position)) {
+                    player.alive = false;
+
+                    round.projectiles.splice(
+                        round.projectiles.indexOf(this),
+                        1
+                    );
+                }
+            }
+        }
+
         // Get the new node and position after the update
         let newNode = round.map.getNodeFromPos(this.position);
         let newPos = this.position.copy();
@@ -93,21 +108,6 @@ export class Projectile {
             this.position.moveTo(v2 - correctionFactor, y2);
             this.velocity.x = -this.velocity.x;
         }
-
-        if (this.damage) {
-            // Check if the projectile hit a player
-            for (let player of round.players) {
-                if (!player.alive) continue;
-                if (player.collidePoint(this.position)) {
-                    player.alive = false;
-
-                    round.projectiles.splice(
-                        round.projectiles.indexOf(this),
-                        1
-                    );
-                }
-            }
-        }
     }
 
     getCondensed(): CondensedProjectile {
@@ -128,11 +128,17 @@ export class Projectile {
 }
 
 export class AirBurst extends Projectile {
-    burstDelay: number = 500;
-    childLifeTime: number = 1200;
+    burstDelay: number = 1500;
+    childLifeTime: number = 2500;
+    splitAngleRange: number = 30;
+    childCount: number = 5;
+    childSpeed: number = 130;
+    speed: number = 150;
     constructor(position: Position, velocity: Velocity, ownerId: string) {
         super(position, velocity, ownerId);
         this.lifeTime = this.burstDelay + this.childLifeTime;
+
+        this.velocity.setSpeed(this.speed);
     }
 
     update(round: Round) {
@@ -144,8 +150,16 @@ export class AirBurst extends Projectile {
             this.width = 0;
             this.height = 0;
 
-            // Burst into 3 projectiles
-            for (let angle of [-15, 0, 15]) {
+            let angles = [];
+
+            for (let i = 0; i < this.childCount; i++) {
+                angles.push(
+                    (this.splitAngleRange / (this.childCount - 1)) * i -
+                        this.splitAngleRange / 2
+                );
+            }
+
+            for (let angle of angles) {
                 let child = new Projectile(
                     this.position.copy(),
                     Velocity.fromAngle(this.velocity.getAngle() + angle, 120),
@@ -155,6 +169,7 @@ export class AirBurst extends Projectile {
                 child.height = 5;
                 child.lifeTime = this.childLifeTime;
                 child.ownerId = this.id;
+                child.velocity.setSpeed(this.childSpeed);
 
                 round.projectiles.push(child);
             }
@@ -166,9 +181,17 @@ export class Rocket extends Projectile {
     speed = 80;
     width = 15;
     height = 15;
-    correctionFactor = 1.5;
+    correctionFactor = 8;
+    lockTime = 3000;
+    lastLock: number = 0;
+    targetPlayer: Player | null = null;
+
     constructor(position: Position, velocity: Velocity, ownerId: string) {
         super(position, velocity, ownerId);
+
+        this.velocity.setSpeed(this.speed);
+
+        this.lastLock = Date.now();
     }
 
     update(round: Round) {
@@ -187,7 +210,19 @@ export class Rocket extends Projectile {
             }
         }
 
-        let angle = this.position.angleTo(nearestPlayer.position);
+        if (this.targetPlayer != nearestPlayer) {
+            this.lastLock = Date.now();
+            this.targetPlayer = nearestPlayer;
+        }
+
+        if (Date.now() - this.lastLock < this.lockTime) {
+            this.velocity.setSpeed(this.speed * 1.4);
+            return;
+        } else {
+            this.velocity.setSpeed(this.speed);
+        }
+
+        let angle = this.position.angleTo(this.targetPlayer.position);
 
         if (this.velocity.getAngle() < angle) {
             this.velocity.setAngle(
@@ -204,14 +239,14 @@ export class Rocket extends Projectile {
 export class LandMine extends Projectile {
     width = 20;
     height = 20;
-    speed = 150;
+    speed = 200;
     lifeTime = 15000;
     damage = false;
-    armTime = 2000;
+    armTime = 1500;
     explodeDistance = 140;
     shrapnelCount = 24;
-    shrapnelSpeed = 200;
-    shrapnelLifeTime = 600;
+    shrapnelSpeed = 359;
+    shrapnelLifeTime = 300;
     triggerTime = 500;
     timeTriggered: number | null = null;
     constructor(position: Position, velocity: Velocity, ownerId: string) {
@@ -278,7 +313,7 @@ export class LandMine extends Projectile {
 export class Lazar extends Projectile {
     width = 5;
     height = 5;
-    speed = 1000;
+    speed = 1500;
     lifeTime = 1000;
     constructor(position: Position, velocity: Velocity, ownerId: string) {
         super(position, velocity, ownerId);
