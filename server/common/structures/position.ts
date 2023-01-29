@@ -160,7 +160,11 @@ export class Position {
      * @returns A copy of the position
      */
     copy(): Position {
-        return new Position(this.x, this.y);
+        let pos = new Position(this.x, this.y);
+
+        pos.lastUpdated = this.lastUpdated;
+
+        return pos;
     }
 
     /**
