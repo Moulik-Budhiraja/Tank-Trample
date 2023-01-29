@@ -272,41 +272,41 @@ export class Map {
      * @param newPos The position the player is trying to move to
      * @returns Position The position the player is capable of moving to
      */
-    checkCollision(oldPos: Position, newPos: Position) {
-        // TODO: Handle diagonal collisions
+    // checkCollision(oldPos: Position, newPos: Position) {
+    //     // TODO: Handle diagonal collisions
 
-        let oldNode = this.getNodeFromPos(oldPos);
-        let newNode = this.getNodeFromPos(newPos);
-        if (!oldNode || !newNode) {
-        } else if (oldNode.connected.includes(newNode) || oldNode === newNode) {
-            return newPos;
-        }
+    //     let oldNode = this.getNodeFromPos(oldPos);
+    //     let newNode = this.getNodeFromPos(newPos);
+    //     if (!oldNode || !newNode) {
+    //     } else if (oldNode.connected.includes(newNode) || oldNode === newNode) {
+    //         return newPos;
+    //     }
 
-        let slope = (newPos.y - oldPos.y) / (newPos.x - oldPos.x);
+    //     let slope = (newPos.y - oldPos.y) / (newPos.x - oldPos.x);
 
-        let h1 = Math.floor(oldPos.y / this.scale) * this.scale;
-        let h2 = Math.ceil(oldPos.y / this.scale) * this.scale;
-        let v1 = Math.floor(oldPos.x / this.scale) * this.scale;
-        let v2 = Math.ceil(oldPos.x / this.scale) * this.scale;
+    //     let h1 = Math.floor(oldPos.y / this.scale) * this.scale;
+    //     let h2 = Math.ceil(oldPos.y / this.scale) * this.scale;
+    //     let v1 = Math.floor(oldPos.x / this.scale) * this.scale;
+    //     let v2 = Math.ceil(oldPos.x / this.scale) * this.scale;
 
-        let x1 = (h1 - oldPos.y) / slope + oldPos.x;
-        let x2 = (h2 - oldPos.y) / slope + oldPos.x;
-        let y1 = (v1 - oldPos.x) * slope + oldPos.y;
-        let y2 = (v2 - oldPos.x) * slope + oldPos.y;
+    //     let x1 = (h1 - oldPos.y) / slope + oldPos.x;
+    //     let x2 = (h2 - oldPos.y) / slope + oldPos.x;
+    //     let y1 = (v1 - oldPos.x) * slope + oldPos.y;
+    //     let y2 = (v2 - oldPos.x) * slope + oldPos.y;
 
-        if (v1 < x1 && x1 < v2 && newPos.y < h1 && h1 < oldPos.y) {
-            return new Position(x1, h1);
-        }
-        if (v1 < x2 && x2 < v2 && oldPos.y < h2 && h2 < newPos.y) {
-            return new Position(x2, h2);
-        }
-        if (h1 < y1 && y1 < h2 && newPos.x < v1 && v1 < oldPos.x) {
-            return new Position(v1, y1);
-        }
-        if (h1 < y2 && y2 < h2 && oldPos.x < v2 && v2 < newPos.x) {
-            return new Position(v2, y2);
-        }
-    }
+    //     if (v1 < x1 && x1 < v2 && newPos.y < h1 && h1 < oldPos.y) {
+    //         return new Position(x1, h1);
+    //     }
+    //     if (v1 < x2 && x2 < v2 && oldPos.y < h2 && h2 < newPos.y) {
+    //         return new Position(x2, h2);
+    //     }
+    //     if (h1 < y1 && y1 < h2 && newPos.x < v1 && v1 < oldPos.x) {
+    //         return new Position(v1, y1);
+    //     }
+    //     if (h1 < y2 && y2 < h2 && oldPos.x < v2 && v2 < newPos.x) {
+    //         return new Position(v2, y2);
+    //     }
+    // }
 
     getCondensed(): CondensedMap {
         return {

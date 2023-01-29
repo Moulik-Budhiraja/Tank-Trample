@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react';
 export function Bullet(props: {
   pos: { x: number; y: number };
   vel: { x: number; y: number };
+  width: number;
+  height: number;
 }) {
   return (
     <>
@@ -12,8 +14,8 @@ export function Bullet(props: {
           top: props.pos.y,
           left: props.pos.x,
           transform: `translate(-50%, -50%)`,
-          width: '10px',
-          height: '10px',
+          width: props.width,
+          height: props.height,
           backgroundColor: 'black',
           borderRadius: '50%'
         }}

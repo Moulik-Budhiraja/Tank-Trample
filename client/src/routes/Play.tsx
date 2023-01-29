@@ -27,6 +27,7 @@ let myBodyAngle: number = 0;
 let myTurretAngle: number = 0;
 let myEvents: GameEvent[] = [];
 let lastPost: number = 0;
+let persistentMapData = '';
 
 let persistentMap: CondensedMap = {
   width: 0,
@@ -100,6 +101,7 @@ export function Play() {
   const [turretRotation, setTurretRotation] = useState(0);
 
   const [map, setMap] = useState(persistentMap);
+  const [mapData, setMapData] = useState(persistentMapData);
 
   const [players, setPlayers] = useState<CondensedPlayer[]>([]);
 
@@ -224,6 +226,7 @@ export function Play() {
       myTurretAngle - 90
     );
   }
+  
 
   // SET UP LOCAL LISTENERS ON EACH MOUNT
   useEffect(() => {
@@ -242,6 +245,7 @@ export function Play() {
     };
   }, [keys, pos]);
 
+  
   // SET UP SOCKET LISTENERS ON FIRST MOUNT
   useEffect(() => {
     socket.on('roundStart', (data: CondensedRound) => {
@@ -249,9 +253,10 @@ export function Play() {
       if (data.map) {
         persistentMap = data.map;
         setMap(data.map);
+        setMapData(data.map.mapData)
       }
     });
-
+    
     socket.on('roundUpdate', (data: CondensedRound) => {
       setPlayers(data.players);
       setProjectiles(data.projectiles);
@@ -296,7 +301,7 @@ export function Play() {
               left: '0'
             }}
           >
-            <path d={''} strokeWidth="3" stroke="black" fill="none"></path>
+            <path d={mapData} strokeWidth="3" stroke="black" fill="none"></path>
           </svg>
 
           {/* RENDER ALL TANKS, AND SELF AS SHADOW */}
@@ -344,6 +349,8 @@ export function Play() {
           {projectiles.map((projectile) => {
             return (
               <Bullet
+                width={projectile.width}
+                height={projectile.height}
                 key={projectile.id}
                 pos={projectile.pos}
                 vel={projectile.vel}
