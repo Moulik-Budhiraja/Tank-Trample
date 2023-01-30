@@ -35,7 +35,7 @@ export function Tank(props: {
   let tankOpacity = 1;
   let textOpacity = 1;
   if (props.ghost) {
-    tankOpacity = 0.5;
+    tankOpacity = 0;
     textOpacity = 0;
   }
 
@@ -48,6 +48,7 @@ export function Tank(props: {
       >
         {props.name !== '' && (
           <h6
+            className="noselect"
             style={{
               position: 'absolute',
               top: props.pos.y,

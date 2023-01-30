@@ -2,7 +2,7 @@ import { Socket } from 'socket.io';
 import { Game } from './game';
 import { CondensedPlayer } from '../types/playerTypes';
 import { Position } from './position';
-import { Projectile, ProjectileTypes } from './projectiles';
+import { Projectile, ProjectileNames } from './projectiles';
 
 /**
  * Represents a player in the game
@@ -22,8 +22,8 @@ export class Player {
     height: number = 35;
     alive: boolean = true;
     score: number = 0;
-    projectileType: any = ProjectileTypes.AIRBURST;
-    projectileUses = 3000;
+    projectileType: any = ProjectileNames.BULLET;
+    projectileUses: number = 0;
 
     constructor(socket: Socket) {
         this.socket = socket;
@@ -119,7 +119,7 @@ export class Player {
         this.projectileUses--;
 
         if (this.projectileUses <= 0) {
-            this.projectileType = ProjectileTypes.BULLET;
+            this.projectileType = ProjectileNames.BULLET;
             this.projectileUses = 0;
         }
     }
