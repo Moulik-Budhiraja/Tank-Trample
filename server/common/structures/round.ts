@@ -70,10 +70,9 @@ export class Round {
                 usedNodes.add(node);
 
                 // Set player position to the middle of the node
-                player.position = node.position.moveBy(
-                    this.map.scale / 2,
-                    this.map.scale / 2
-                );
+                player.position = node.position
+                    .copy()
+                    .moveBy(this.map.scale / 2, this.map.scale / 2);
                 break;
             }
         }
@@ -115,7 +114,7 @@ export class Round {
                 }
             }
 
-            if (Math.random() * 300 < 1) {
+            if (Math.random() * 250 < 1) {
                 this.powerups.push(PowerUp.randomPowerUp(this));
             }
 
