@@ -2,6 +2,7 @@ import { Socket } from 'socket.io';
 import { Game } from './game';
 import { CondensedPlayer } from '../types/playerTypes';
 import { Position } from './position';
+import { Maze } from './map';
 import { Projectile, ProjectileNames } from './projectiles';
 
 /**
@@ -115,6 +116,17 @@ export class Player {
         );
     }
 
+    getNonRotatedPoints(): Position[] {
+        let points = [
+            this.position.copy().moveBy(-this.width / 2, -this.height / 2),
+            this.position.copy().moveBy(this.width / 2, -this.height / 2),
+            this.position.copy().moveBy(this.width / 2, this.height / 2),
+            this.position.copy().moveBy(-this.width / 2, this.height / 2)
+        ];
+
+        return points;
+    }
+
     usedProjectile() {
         this.projectileUses--;
 
@@ -163,5 +175,90 @@ export class Player {
         areaToPoint = Math.abs(areaToPoint / 2);
 
         return Math.abs(areaToPoint - area) < 1;
+    }
+
+    sendPosCorrection() {
+        this.socket.emit('pos-correction', this.position.getCondensed());
+    }
+
+    updatePosition(map: Maze, targetPos: Position) {
+        let points = this.getNonRotatedPoints();
+
+
+        let dx = targetPos.x - this.position.x;
+        let dy = targetPos.y - this.position.y;
+        const correctionFactor = 0.5;
+
+        for (let oldPos of points) {
+            let newPos = new Position(oldPos.x + dx, oldPos.y + dy);
+            let oldNode = map.getNodeFromPos(oldPos);
+            let newNode = map.getNodeFromPos(newPos);
+
+            if (oldNode === null || newNode === null) {
+            } else if (oldNode === newNode || oldNode.connected.includes(newNode)) {
+                continue;
+            } 
+    
+            // Calculate the slope of the line between the old and new position
+            let slope = (newPos.y - oldPos.y) / (newPos.x - oldPos.x);
+    
+            // Calculate the horizontal and vertical boundaries of the current node
+            let h1 = Math.floor(oldPos.y / map.scale) * map.scale;
+            let h2 = Math.ceil(oldPos.y / map.scale) * map.scale;
+            let v1 = Math.floor(oldPos.x / map.scale) * map.scale;
+            let v2 = Math.ceil(oldPos.x / map.scale) * map.scale;
+    
+            // Calculate the intersection points of the line between the old and new position with the horizontal and vertical boundaries of the current node
+            let x1 = (h1 - oldPos.y) / slope + oldPos.x;
+            let x2 = (h2 - oldPos.y) / slope + oldPos.x;
+            let y1 = (v1 - oldPos.x) * slope + oldPos.y;
+            let y2 = (v2 - oldPos.x) * slope + oldPos.y;
+    
+            // Check if the intersection points are within the boundaries of the current node, and if the new position is on the opposite side of the boundary as the old position
+            // If so, update the position to the intersection point and reverse the velocity in the appropriate direction
+    
+            // Top boundary
+            if (v1 < x1 && x1 < v2 && newPos.y < h1 && h1 < oldPos.y) {
+                dx = x1 - oldPos.x;
+                dy = h1 - oldPos.y;
+                
+                this.position.moveBy(dx, dy + correctionFactor);
+                this.sendPosCorrection();
+                console.log(this.position.x, this.position.y, dx, dy, slope)
+                return;
+            }
+            // Bottom boundary
+            if (v1 < x2 && x2 < v2 && oldPos.y < h2 && h2 < newPos.y) {
+                dx = x2 - oldPos.x;
+                dy = h2 - oldPos.y;
+                
+                this.position.moveBy(dx, dy - correctionFactor);
+                this.sendPosCorrection();
+                console.log(this.position.x, this.position.y, dx, dy, slope)
+                return;
+            }
+            // Left boundary
+            if (h1 < y1 && y1 < h2 && newPos.x < v1 && v1 < oldPos.x) {
+                dx = v1 - oldPos.x;
+                dy = y1 - oldPos.y;
+                
+                this.position.moveBy(dx + correctionFactor, dy);
+                this.sendPosCorrection();
+                console.log(this.position.x, this.position.y, dx, dy, slope)
+                return;
+            }
+            // Right boundary
+            if (h1 < y2 && y2 < h2 && oldPos.x < v2 && v2 < newPos.x) {
+                dx = v2 - oldPos.x;
+                dy = y2 - oldPos.y;
+                
+                this.position.moveBy(dx - correctionFactor, dy);
+                this.sendPosCorrection();
+                console.log(this.position.x, this.position.y, dx, dy, slope)
+                return;
+            }
+        }
+
+        this.position.moveTo(targetPos.x, targetPos.y);
     }
 }

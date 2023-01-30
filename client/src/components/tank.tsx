@@ -35,7 +35,7 @@ export function Tank(props: {
   let tankOpacity = 1;
   let textOpacity = 1;
   if (props.ghost) {
-    tankOpacity = 0;
+    tankOpacity = 0.5;
     textOpacity = 0;
   }
 
