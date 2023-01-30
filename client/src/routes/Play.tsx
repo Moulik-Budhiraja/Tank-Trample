@@ -272,6 +272,12 @@ export function Play() {
       myPosition.x = data.position.x;
       myPosition.y = data.position.y;
     });
+
+    socket.on("pos-correction", (data: CondensedPosition) => {
+        myPosition.x = data.x;
+        myPosition.y = data.y;
+
+    })
   }, []);
   return (
     <>
