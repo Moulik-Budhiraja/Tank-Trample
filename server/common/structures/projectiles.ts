@@ -475,7 +475,7 @@ export class PowerUp {
             .copy()
             .moveBy(round.map.scale / 2, round.map.scale / 2);
 
-        let powerType = Math.floor(Math.random() * 3);
+        let powerType = Math.floor(Math.random() * 4);
 
         if (powerType == 0) {
             return new PowerUp(position, 'R', ProjectileNames.ROCKET);
