@@ -9,11 +9,15 @@ import { socket } from '../service/socket';
 import { CondensedPlayer } from '../../../server/common/types/playerTypes';
 import { UPDATE_INTERVAL } from '../config';
 import { PingTracker } from '../components/pingTracker';
-import { CondensedProjectile } from '../../../server/common/types/projectileTypes';
+import {
+  CondensedPowerUp,
+  CondensedProjectile
+} from '../../../server/common/types/projectileTypes';
 import { Bullet } from '../components/bullet';
 import { CondensedMap } from '../../../server/common/types/mapTypes';
 import { PLAYER_WIDTH, PLAYER_HEIGHT } from '../config';
 import { ScoreBoard } from '../components/scoreBoard';
+import { PowerUp } from '../components/powerup';
 
 const keys = {
   w: false,
@@ -106,8 +110,9 @@ export function Play() {
   const [players, setPlayers] = useState<CondensedPlayer[]>([]);
 
   const [projectiles, setProjectiles] = useState<CondensedProjectile[]>([]);
+  const [powerups, setPowerups] = useState<CondensedPowerUp[]>([]);
 
-  const VELOCITY = 100;
+  const VELOCITY = 120;
 
   type keyTypes = 'w' | 'a' | 's' | 'd';
 
@@ -226,7 +231,6 @@ export function Play() {
       myTurretAngle - 90
     );
   }
-  
 
   // SET UP LOCAL LISTENERS ON EACH MOUNT
   useEffect(() => {
@@ -245,7 +249,6 @@ export function Play() {
     };
   }, [keys, pos]);
 
-  
   // SET UP SOCKET LISTENERS ON FIRST MOUNT
   useEffect(() => {
     socket.on('roundStart', (data: CondensedRound) => {
@@ -253,13 +256,14 @@ export function Play() {
       if (data.map) {
         persistentMap = data.map;
         setMap(data.map);
-        setMapData(data.map.mapData)
+        setMapData(data.map.mapData);
       }
     });
-    
+
     socket.on('roundUpdate', (data: CondensedRound) => {
       setPlayers(data.players);
       setProjectiles(data.projectiles);
+      setPowerups(data.powerups);
     });
 
     socket.on('player-update', (data: CondensedPlayer) => {
@@ -355,6 +359,17 @@ export function Play() {
                 pos={projectile.pos}
                 vel={projectile.vel}
               ></Bullet>
+            );
+          })}
+
+          {/* RENDER ALL POWERUPS */}
+          {powerups.map((powerup) => {
+            return (
+              <PowerUp
+                key={powerup.id}
+                pos={powerup.position}
+                letter={powerup.letter}
+              ></PowerUp>
             );
           })}
         </div>

@@ -1,7 +1,15 @@
-import { Map } from './map';
+import { Maze } from './map';
 import { Player } from './player';
 import { MapNode } from './map';
-import { AirBurst, LandMine, Lazar, Projectile, Rocket } from './projectiles';
+import {
+    AirBurst,
+    LandMine,
+    Laser,
+    PowerUp,
+    Projectile,
+    ProjectileNames,
+    Rocket
+} from './projectiles';
 import { CondensedRound, GameEvent } from '../types/gameTypes';
 import { Game } from './game';
 import { Position, Velocity } from './position';
@@ -16,8 +24,9 @@ export class Round {
     gameCode: string;
     players: Player[];
     projectiles: Projectile[];
+    powerups: PowerUp[] = [];
     roundNumber: number;
-    map: Map;
+    map: Maze;
     updateInterval: NodeJS.Timeout | null = null;
     endRoundTimeout: NodeJS.Timeout | null = null;
 
@@ -28,7 +37,17 @@ export class Round {
         this.projectiles = [];
 
         // Generate map with between 10 and 20 nodes in each direction
-        this.map = new Map(4, 6, 100);
+        this.map = new Maze(4, 6, 100);
+
+        if (this.players.length > 5) {
+            this.map.removeWalls(Math.random() * 0.6 + 0.35);
+        } else if (this.players.length > 3) {
+            this.map.removeWalls(Math.random() * 0.4 + 0.2);
+        } else if (this.players.length > 2) {
+            this.map.removeWalls(Math.random() * 0.5);
+        } else {
+            this.map.removeWalls(Math.random() * 0.3);
+        }
 
         this.initializePlayers();
     }
@@ -63,6 +82,8 @@ export class Round {
         for (let player of this.players) {
             this.initializePlayerEvents(player);
             player.alive = true;
+            player.projectileType = ProjectileNames.BULLET;
+            player.projectileUses = 0;
 
             player.sendUpdate();
         }
@@ -92,6 +113,14 @@ export class Round {
                         );
                     }, 5000);
                 }
+            }
+
+            if (Math.random() * 300 < 1) {
+                this.powerups.push(PowerUp.randomPowerUp(this));
+            }
+
+            for (let powerup of this.powerups) {
+                powerup.checkClaim(this);
             }
 
             Game.io
@@ -148,6 +177,7 @@ export class Round {
                 projectile.getCondensed()
             ),
             players: this.players.map((player) => player.getCondensed()),
+            powerups: this.powerups.map((powerup) => powerup.getCondensed()),
             map: withMap ? this.map.getCondensed() : null
         };
     }

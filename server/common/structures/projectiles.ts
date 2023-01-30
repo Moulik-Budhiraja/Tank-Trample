@@ -1,13 +1,19 @@
 import { Position, Velocity } from './position';
-import { Map } from './map';
-import { CondensedProjectile } from '../types/projectileTypes';
+import { MapNode, Maze } from './map';
+import {
+    CondensedPowerUp,
+    CondensedProjectile,
+    ProjectileType,
+    ProjectileTypes
+} from '../types/projectileTypes';
 import { Player } from './player';
 import { Round } from './round';
 
 export class Projectile {
     id: string;
+    name: ProjectileType = 'BULLET';
     position: Position;
-    velocity: Velocity = new Velocity(120, 120);
+    velocity: Velocity = new Velocity(135, 135);
     ownerId: string;
     collision: boolean = true;
     damage: boolean = true;
@@ -15,7 +21,7 @@ export class Projectile {
     timeFired: number = NaN;
     width: number = 10;
     height: number = 10;
-    speed = 120;
+    speed = 135;
 
     constructor(position: Position, velocity: Velocity, ownerId: string) {
         this.position = position;
@@ -128,11 +134,12 @@ export class Projectile {
 }
 
 export class AirBurst extends Projectile {
+    name: ProjectileType = 'AIRBURST';
     burstDelay: number = 1500;
     childLifeTime: number = 2500;
     splitAngleRange: number = 30;
     childCount: number = 5;
-    childSpeed: number = 130;
+    childSpeed: number = 135;
     speed: number = 150;
     constructor(position: Position, velocity: Velocity, ownerId: string) {
         super(position, velocity, ownerId);
@@ -162,7 +169,7 @@ export class AirBurst extends Projectile {
             for (let angle of angles) {
                 let child = new Projectile(
                     this.position.copy(),
-                    Velocity.fromAngle(this.velocity.getAngle() + angle, 120),
+                    Velocity.fromAngle(this.velocity.getAngle() + angle, 135),
                     this.ownerId
                 );
                 child.width = 5;
@@ -178,13 +185,16 @@ export class AirBurst extends Projectile {
 }
 
 export class Rocket extends Projectile {
-    speed = 80;
+    name: ProjectileType = 'ROCKET';
+    speed = 110;
     width = 15;
     height = 15;
-    correctionFactor = 8;
-    lockTime = 3000;
+    correctionFactor = 3;
+    lockTime = 2500;
     lastLock: number = 0;
     targetPlayer: Player | null = null;
+    goToNew = false;
+    lastNode: MapNode | null = null;
 
     constructor(position: Position, velocity: Velocity, ownerId: string) {
         super(position, velocity, ownerId);
@@ -222,21 +232,81 @@ export class Rocket extends Projectile {
             this.velocity.setSpeed(this.speed);
         }
 
-        let angle = this.position.angleTo(this.targetPlayer.position);
+        // BFS to the nearest players node
+        let currentNode = round.map.getNodeFromPos(this.position);
+        let targetNode = round.map.getNodeFromPos(this.targetPlayer.position);
 
-        if (this.velocity.getAngle() < angle) {
-            this.velocity.setAngle(
-                this.velocity.getAngle() + this.correctionFactor
-            );
-        } else {
-            this.velocity.setAngle(
-                this.velocity.getAngle() - this.correctionFactor
-            );
+        let queue = [currentNode];
+        let visited = new Set();
+        let parentMap = new Map();
+
+        while (queue.length > 0) {
+            let node = queue.shift();
+            if (node == targetNode) break;
+            if (!node) break;
+
+            for (let neighbor of node.connected) {
+                if (!visited.has(neighbor)) {
+                    visited.add(neighbor);
+                    queue.push(neighbor);
+                    parentMap.set(neighbor, node);
+                }
+            }
         }
+
+        let path = [targetNode];
+        let current = targetNode;
+        while (current != currentNode) {
+            current = parentMap.get(current);
+            path.push(current);
+        }
+
+        let nextNode = path[path.length - 2];
+
+        if (!nextNode) return;
+
+        // If the distance to the current node's center is less than half the scale, move to the next node
+        // Otherwise, move towards the center of the current node
+        if (this.lastNode != currentNode) {
+            this.goToNew = false;
+            this.lastNode = currentNode;
+        }
+
+        let targetPos = this.position;
+
+        if (
+            (currentNode &&
+                this.position.distanceTo(
+                    currentNode.position
+                        .copy()
+                        .moveBy(round.map.scale / 2, round.map.scale / 2)
+                ) <
+                    round.map.scale / 2) ||
+            this.goToNew
+        ) {
+            targetPos = nextNode.position
+                .copy()
+                .moveBy(round.map.scale / 2, round.map.scale / 2);
+            this.goToNew = true;
+        } else if (currentNode) {
+            targetPos = currentNode.position
+                .copy()
+                .moveBy(round.map.scale / 2, round.map.scale / 2);
+        }
+
+        if (currentNode == targetNode) {
+            targetPos = this.targetPlayer.position;
+        }
+
+        let angle = this.position.angleTo(targetPos);
+        angle = (angle + 360) % 360;
+
+        this.velocity.setAngle(angle);
     }
 }
 
 export class LandMine extends Projectile {
+    name: ProjectileType = 'MINE';
     width = 20;
     height = 20;
     speed = 200;
@@ -283,8 +353,9 @@ export class LandMine extends Projectile {
         }
 
         if (
-            this.timeTriggered &&
-            Date.now() - this.timeTriggered > this.triggerTime
+            (this.timeTriggered &&
+                Date.now() - this.timeTriggered > this.triggerTime) ||
+            this.lifeTime < Date.now() - this.timeFired
         ) {
             round.projectiles.splice(round.projectiles.indexOf(this), 1);
 
@@ -295,7 +366,7 @@ export class LandMine extends Projectile {
             ) {
                 let child = new Projectile(
                     this.position.copy(),
-                    Velocity.fromAngle(angle, 120),
+                    Velocity.fromAngle(angle, 135),
                     this.ownerId
                 );
                 child.width = 5;
@@ -310,7 +381,8 @@ export class LandMine extends Projectile {
     }
 }
 
-export class Lazar extends Projectile {
+export class Laser extends Projectile {
+    name: ProjectileType = 'LASER';
     width = 5;
     height = 5;
     speed = 1500;
@@ -326,10 +398,95 @@ export class Lazar extends Projectile {
     }
 }
 
-export const ProjectileTypes = {
+export const ProjectileNames = {
     BULLET: Projectile,
     ROCKET: Rocket,
-    LAZAR: Lazar,
+    LASER: Laser,
     AIRBURST: AirBurst,
-    LANDMINE: LandMine
+    MINE: LandMine
 };
+
+export const ProjectileUses = {
+    B: 0,
+    R: 1,
+    L: 3,
+    A: 10,
+    M: 5
+};
+
+export class PowerUp {
+    id: string;
+    position: Position;
+    letter: 'B' | 'R' | 'L' | 'A' | 'M';
+    type: ProjectileTypes;
+    claimRadius = 50;
+    constructor(
+        position: Position,
+        letter: 'B' | 'R' | 'L' | 'A' | 'M',
+        type: any
+    ) {
+        this.position = position;
+        this.letter = letter;
+        this.type = type;
+
+        this.id =
+            Math.random().toString(36).substring(2, 15) +
+            Math.random().toString(36).substring(2, 15);
+    }
+
+    checkClaim(round: Round) {
+        let closestPlayer: Player | null = null;
+        for (let player of round.players) {
+            if (player.position.distanceTo(this.position) < this.claimRadius) {
+                if (!closestPlayer) {
+                    closestPlayer = player;
+                } else if (
+                    player.position.distanceTo(this.position) <
+                    closestPlayer.position.distanceTo(this.position)
+                ) {
+                    closestPlayer = player;
+                }
+            }
+        }
+
+        if (closestPlayer) {
+            closestPlayer.projectileType = this.type;
+            closestPlayer.projectileUses = ProjectileUses[this.letter];
+            round.powerups.splice(round.powerups.indexOf(this), 1);
+        }
+    }
+
+    getCondensed(): CondensedPowerUp {
+        return {
+            id: this.id,
+            position: this.position.getCondensed(),
+            letter: this.letter
+        };
+    }
+
+    static randomPowerUp(round: Round): PowerUp {
+        // Get a random node for the powerup
+        let node = round.map.getNode(
+            Math.floor(Math.random() * round.map.width),
+            Math.floor(Math.random() * round.map.height)
+        );
+
+        let position = node.position
+            .copy()
+            .moveBy(round.map.scale / 2, round.map.scale / 2);
+
+        let powerType = Math.floor(Math.random() * 3);
+
+        if (powerType == 0) {
+            return new PowerUp(position, 'R', ProjectileNames.ROCKET);
+        } else if (powerType == 3) {
+            return new PowerUp(position, 'L', ProjectileNames.LASER);
+        } else if (powerType == 2) {
+            return new PowerUp(position, 'A', ProjectileNames.AIRBURST);
+        } else if (powerType == 1) {
+            return new PowerUp(position, 'M', ProjectileNames.MINE);
+        }
+
+        return new PowerUp(position, 'B', ProjectileNames.BULLET);
+    }
+}
