@@ -47,6 +47,20 @@ npm start
 
 The client will be available at `http://localhost:3000` and the server will be available at `http://localhost:3001`.
 
-## Usage
+## Play
 
-The game is currently in development and is not yet playable. The game will be playable once the game is finished.
+1. Navigate to your hosted URL.
+2. Choose "Create Game" to create a new game or enter a game code to join an existing game.
+3. In the lobby screen, choose a name and wait for the host to start the game.
+4. Once in the play screen, use the WASD keys to move your tank, use the mouse to aim your cannon, and click to fire.
+5. Powerups will spawn periodically that modify your tank's cannon. 
+6. The last person standing in a round wins a point.
+
+An online hosted version of this game is currently availible at [https://tank-trample.budhiraja.ca/](https://tank-trample.budhiraja.ca/).
+
+## Known Issues
+
+* Tanks can shoot through walls if close enough
+* Tanks can drive on walls if colliding from an endpoint
+* Bullets can hit tank if tank is clipping through a wall
+* Players sometimes spawn inside walls at the start of a round
