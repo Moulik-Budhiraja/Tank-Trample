@@ -3,6 +3,7 @@ import { transform } from 'typescript';
 
 export function Tank(props: {
   pos: { x: number; y: number };
+  self: boolean;
   width: number;
   height: number;
   bodyRotation: number;
@@ -68,7 +69,7 @@ export function Tank(props: {
           style={{
             width: props.width,
             height: props.height,
-            backgroundColor: 'red',
+            backgroundColor: !props.self ? 'red' : '#0d5eff',
             outline: '1px solid black',
             position: 'absolute',
             top: props.pos.y,
@@ -104,7 +105,7 @@ export function Tank(props: {
           style={{
             width: props.width / 4,
             height: props.height / 1.2,
-            backgroundColor: 'crimson',
+            backgroundColor: !props.self ? 'crimson' : '#007be9',
             position: 'absolute',
             outline: '1px solid black',
             top: `${props.pos.y}px`,
@@ -119,7 +120,7 @@ export function Tank(props: {
           style={{
             width: props.width / 2,
             height: props.height / 2,
-            backgroundColor: 'crimson',
+            backgroundColor: !props.self ? 'crimson' : '#007be9',
             outline: '1px solid black',
             position: 'absolute',
             top: props.pos.y - props.height / 4,

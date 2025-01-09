@@ -137,7 +137,10 @@ export class Round {
             for (let event of data.events) {
                 // MOVE EVENT
                 if (event.type === 'move') {
-                    player.updatePosition(this.map, Position.fromCondensed(event.position));
+                    player.updatePosition(
+                        this.map,
+                        Position.fromCondensed(event.position)
+                    );
                     player.bodyAngle = event.bodyAngle;
                     player.turretAngle = event.turretAngle;
 

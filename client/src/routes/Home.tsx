@@ -135,6 +135,7 @@ export function Home() {
       </div>
 
       <Tank
+        self={false}
         name={''}
         width={200}
         height={200}

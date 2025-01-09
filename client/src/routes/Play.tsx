@@ -273,11 +273,10 @@ export function Play() {
       myPosition.y = data.position.y;
     });
 
-    socket.on("pos-correction", (data: CondensedPosition) => {
-        myPosition.x = data.x;
-        myPosition.y = data.y;
-
-    })
+    socket.on('pos-correction', (data: CondensedPosition) => {
+      myPosition.x = data.x;
+      myPosition.y = data.y;
+    });
   }, []);
   return (
     <>
@@ -318,24 +317,12 @@ export function Play() {
           {players.map((player) => {
             if (!player.alive) return null;
 
-            if (player.id === playerId)
-              return (
-                <Tank
-                  name={player.name}
-                  key={player.id}
-                  pos={player.position}
-                  width={PLAYER_WIDTH}
-                  height={PLAYER_HEIGHT}
-                  bodyRotation={player.bodyAngle}
-                  turretRotation={player.turretAngle}
-                  ghost={true}
-                />
-              );
-
+            if (player.id === playerId) return null;
             return (
               <Tank
                 name={player.name}
                 key={player.id}
+                self={false}
                 pos={player.position}
                 width={PLAYER_WIDTH}
                 height={PLAYER_HEIGHT}
@@ -347,6 +334,7 @@ export function Play() {
           {players.find((player) => player.id === playerId)?.alive && (
             <Tank
               name={'You'}
+              self={true}
               pos={pos}
               width={PLAYER_WIDTH}
               height={PLAYER_HEIGHT}
