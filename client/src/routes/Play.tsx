@@ -155,23 +155,24 @@ export function Play() {
     if (keys.s) {
       dy -= (VELOCITY * (lastUpdated - Date.now())) / 1000;
 
-      if (myPosition.y + dy > map.height * map.scale - PLAYER_HEIGHT / 2) {
+      if (myPosition.y + dy < PLAYER_WIDTH / 2) {
         dy += (VELOCITY * (lastUpdated - Date.now())) / 1000;
       }
     }
 
     if (keys.d) {
+      console.log('Initial x' + dx);
       dx -= (VELOCITY * (lastUpdated - Date.now())) / 1000;
 
-      if (myPosition.x + dx > map.width * map.scale - PLAYER_WIDTH / 2) {
+      if (myPosition.x + dx < PLAYER_WIDTH / 2) {
         dx += (VELOCITY * (lastUpdated - Date.now())) / 1000;
       }
+
+      console.log('Final x' + dx);
     }
 
-    if (dx !== 0 || dy !== 0) {
-      dx /= Math.sqrt(2);
-      dy /= Math.sqrt(2);
-    }
+    dx /= Math.sqrt(2);
+    dy /= Math.sqrt(2);
 
     myPosition.x += dx;
     myPosition.y += dy;
@@ -273,11 +274,10 @@ export function Play() {
       myPosition.y = data.position.y;
     });
 
-    socket.on("pos-correction", (data: CondensedPosition) => {
-        myPosition.x = data.x;
-        myPosition.y = data.y;
-
-    })
+    socket.on('pos-correction', (data: CondensedPosition) => {
+      myPosition.x = data.x;
+      myPosition.y = data.y;
+    });
   }, []);
   return (
     <>
@@ -293,8 +293,8 @@ export function Play() {
           id="game-container"
           style={{
             outline: '3px solid black',
-            width: '600px',
-            height: '400px',
+            width: `${map.width * map.scale}px`,
+            height: `${map.height * map.scale}px`,
             position: 'absolute',
             top: '50%',
             left: '50%',
@@ -303,8 +303,8 @@ export function Play() {
           }}
         >
           <svg
-            width="600px"
-            height="400px"
+            width={`${map.width * map.scale}px`}
+            height={`${map.height * map.scale}px`}
             style={{
               position: 'absolute',
               top: '0',
