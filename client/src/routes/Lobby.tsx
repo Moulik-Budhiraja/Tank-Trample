@@ -19,6 +19,8 @@ export function Lobby() {
 
   const [players, setPlayers] = useState([] as CondensedPlayer[]);
 
+  const [gameSize, setGameSize] = useState(1);
+
   const [myName, setMyName] = useState(String);
   const [isHost, setIsHost] = useState(false);
 
@@ -84,6 +86,12 @@ export function Lobby() {
     input!.value = '';
   }
 
+  function updateGameSize(event: React.ChangeEvent<HTMLSelectElement>) {
+    const newSize = Number(event.target.value);
+    setGameSize(newSize);
+    socket.emit('update-game-size', { size: newSize });
+  }
+
   function startGame() {
     if (isHost) {
       socket.emit('start-game');
@@ -140,6 +148,23 @@ export function Lobby() {
                 Update
               </button>
             </span>
+            {isHost && (
+              <div className="form-group mt-3">
+                <label htmlFor="gameSize">Game Size:</label>
+                <select
+                  id="gameSize"
+                  className="form-control"
+                  value={gameSize}
+                  onChange={updateGameSize}
+                >
+                  {[1, 2, 3].map((size) => (
+                    <option key={size} value={size}>
+                      {size}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
             {gameCodeError && (
               <p style={{ color: 'red' }}>
                 Game code is invalid. Redirecting to home page...
