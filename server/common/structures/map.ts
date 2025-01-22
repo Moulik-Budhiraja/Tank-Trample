@@ -1,6 +1,7 @@
 import { Position } from './position';
 import { CondensedMap, CondensedMapNode } from '../types/mapTypes';
 
+
 /**
  * Represents a node in a maze
  *

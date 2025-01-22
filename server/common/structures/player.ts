@@ -4,6 +4,7 @@ import { CondensedPlayer } from '../types/playerTypes';
 import { Position } from './position';
 import { Maze } from './map';
 import { Projectile, ProjectileNames } from './projectiles';
+import { WallManager } from './walls';
 
 /**
  * Represents a player in the game
@@ -25,6 +26,7 @@ export class Player {
     score: number = 0;
     projectileType: any = ProjectileNames.BULLET;
     projectileUses: number = 0;
+    private lastLogTime?: number;
 
     constructor(socket: Socket) {
         this.socket = socket;
@@ -181,84 +183,53 @@ export class Player {
         this.socket.emit('pos-correction', this.position.getCondensed());
     }
 
-    updatePosition(map: Maze, targetPos: Position) {
-        let points = this.getNonRotatedPoints();
+    updatePosition(map: Maze, wallManager: WallManager, targetPos: Position) {
+        const CORRECTION = this.width / 2 + 5; 
 
+        const currentX = this.position.x;
+        const currentY = this.position.y;
+        
+        const topRightCorner = new Position(targetPos.x + CORRECTION, targetPos.y - CORRECTION);
+        const topLeftCorner = new Position(targetPos.x  - CORRECTION, targetPos.y - CORRECTION);
+        const bottomRightCorner = new Position(targetPos.x  + CORRECTION, targetPos.y + CORRECTION);
+        const bottomLeftCorner = new Position(targetPos.x   - CORRECTION, targetPos.y + CORRECTION);
+        const topMiddlePoint = new Position(targetPos.x, targetPos.y - CORRECTION); 
+        const bottomMiddlePoint = new Position(targetPos.x, targetPos.y + CORRECTION); 
+        const leftMiddlePoint = new Position(targetPos.x - CORRECTION, targetPos.y); 
+        const rightMiddlePoint = new Position(targetPos.x + CORRECTION, targetPos.y); 
 
-        let dx = targetPos.x - this.position.x;
-        let dy = targetPos.y - this.position.y;
-        const correctionFactor = 0.5;
+        // Check movement direction
+        const movingRight = targetPos.x > currentX;
+        const movingLeft = targetPos.x < currentX;
+        const movingUp = targetPos.y < currentY;
+        const movingDown = targetPos.y > currentY;
 
-        for (let oldPos of points) {
-            let newPos = new Position(oldPos.x + dx, oldPos.y + dy);
-            let oldNode = map.getNodeFromPos(oldPos);
-            let newNode = map.getNodeFromPos(newPos);
-
-            if (oldNode === null || newNode === null) {
-            } else if (oldNode === newNode || oldNode.connected.includes(newNode)) {
-                continue;
-            } 
-    
-            // Calculate the slope of the line between the old and new position
-            let slope = (newPos.y - oldPos.y) / (newPos.x - oldPos.x);
-    
-            // Calculate the horizontal and vertical boundaries of the current node
-            let h1 = Math.floor(oldPos.y / map.scale) * map.scale;
-            let h2 = Math.ceil(oldPos.y / map.scale) * map.scale;
-            let v1 = Math.floor(oldPos.x / map.scale) * map.scale;
-            let v2 = Math.ceil(oldPos.x / map.scale) * map.scale;
-    
-            // Calculate the intersection points of the line between the old and new position with the horizontal and vertical boundaries of the current node
-            let x1 = (h1 - oldPos.y) / slope + oldPos.x;
-            let x2 = (h2 - oldPos.y) / slope + oldPos.x;
-            let y1 = (v1 - oldPos.x) * slope + oldPos.y;
-            let y2 = (v2 - oldPos.x) * slope + oldPos.y;
-    
-            // Check if the intersection points are within the boundaries of the current node, and if the new position is on the opposite side of the boundary as the old position
-            // If so, update the position to the intersection point and reverse the velocity in the appropriate direction
-    
-            // Top boundary
-            if (v1 < x1 && x1 < v2 && newPos.y < h1 && h1 < oldPos.y) {
-                dx = x1 - oldPos.x;
-                dy = h1 - oldPos.y;
-                
-                this.position.moveBy(dx, dy + correctionFactor);
-                this.sendPosCorrection();
-                console.log(this.position.x, this.position.y, dx, dy, slope)
-                return;
-            }
-            // Bottom boundary
-            if (v1 < x2 && x2 < v2 && oldPos.y < h2 && h2 < newPos.y) {
-                dx = x2 - oldPos.x;
-                dy = h2 - oldPos.y;
-                
-                this.position.moveBy(dx, dy - correctionFactor);
-                this.sendPosCorrection();
-                console.log(this.position.x, this.position.y, dx, dy, slope)
-                return;
-            }
-            // Left boundary
-            if (h1 < y1 && y1 < h2 && newPos.x < v1 && v1 < oldPos.x) {
-                dx = v1 - oldPos.x;
-                dy = y1 - oldPos.y;
-                
-                this.position.moveBy(dx + correctionFactor, dy);
-                this.sendPosCorrection();
-                console.log(this.position.x, this.position.y, dx, dy, slope)
-                return;
-            }
-            // Right boundary
-            if (h1 < y2 && y2 < h2 && oldPos.x < v2 && v2 < newPos.x) {
-                dx = v2 - oldPos.x;
-                dy = y2 - oldPos.y;
-                
-                this.position.moveBy(dx - correctionFactor, dy);
-                this.sendPosCorrection();
-                console.log(this.position.x, this.position.y, dx, dy, slope)
-                return;
-            }
+        // Check collisions and prevent movement in collision directions
+        let newX = targetPos.x;
+        let newY = targetPos.y;
+        
+        if (movingUp && (wallManager.checkLineCollision(this.position, topLeftCorner) || wallManager.checkLineCollision(this.position, topMiddlePoint) || wallManager.checkLineCollision(this.position, topRightCorner) || wallManager.checkLineCollision(topLeftCorner, topRightCorner))) {
+            // console.log("Up collision");
+            newY = currentY;
+        }
+        if (movingDown && (wallManager.checkLineCollision(this.position, bottomLeftCorner) || wallManager.checkLineCollision(this.position, bottomMiddlePoint) || wallManager.checkLineCollision(this.position, bottomRightCorner) || wallManager.checkLineCollision(bottomLeftCorner, bottomRightCorner))) {
+            // console.log("Down collision");
+            newY = currentY;
+        }
+        if (movingRight && (wallManager.checkLineCollision(this.position, topRightCorner) || wallManager.checkLineCollision(this.position, rightMiddlePoint) || wallManager.checkLineCollision(this.position, bottomRightCorner) || wallManager.checkLineCollision(topRightCorner, bottomRightCorner))) {
+            // console.log("Right collision");
+            newX = currentX;
+        }
+        if (movingLeft && (wallManager.checkLineCollision(this.position, topLeftCorner) || wallManager.checkLineCollision(this.position, leftMiddlePoint) || wallManager.checkLineCollision(this.position, bottomLeftCorner) || wallManager.checkLineCollision(topLeftCorner, bottomLeftCorner))) {
+            // console.log("Left collision");
+            newX = currentX;
         }
 
-        this.position.moveTo(targetPos.x, targetPos.y);
+
+        
+
+        // Update position
+        this.position.moveTo(newX, newY);
+        this.sendPosCorrection();
     }
 }

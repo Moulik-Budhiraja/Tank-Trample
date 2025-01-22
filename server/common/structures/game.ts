@@ -17,11 +17,12 @@ export class Game {
     gameCode: string;
     playerList: Player[] = [];
     currentRound: Round;
+    gameSize: number;
 
     constructor() {
         this.gameCode = this.generateGameCode();
         this.currentRound = new Round(this.gameCode, this.playerList, 0);
-
+        this.gameSize = 1;
         Game.games.push(this);
     }
 
@@ -60,6 +61,10 @@ export class Game {
             player.host = true;
             player.sendUpdate();
         }
+    }
+
+    changeGameSize(gameSize: number) {
+        this.gameSize = gameSize;
     }
 
     /**
@@ -214,7 +219,7 @@ export class Game {
 
         player.socket.on('start-game', () => {
             let game = Game.getGameByCode(player.gameCode);
-            if (game !== null && player.host && game.playerList.length > 1) {
+            if (game !== null && player.host && game.playerList.length >= 1) {
                 Game.io.to(player.gameCode).emit('game-started');
 
                 game.currentRound.endRound();
@@ -224,6 +229,13 @@ export class Game {
                     game.playerList,
                     0
                 );
+            }
+        });
+
+        player.socket.on('update-game-size', (data: { size: number }) => {
+            let game = Game.getGameByCode(player.gameCode);
+            if (game !== null && player.host) {
+                game.changeGameSize(data.size);
             }
         });
     }

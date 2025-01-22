@@ -13,6 +13,7 @@ import {
 import { CondensedRound, GameEvent } from '../types/gameTypes';
 import { Game } from './game';
 import { Position, Velocity } from './position';
+import { WallManager } from './walls';
 
 /**
  * Represents one round of the game
@@ -27,6 +28,7 @@ export class Round {
     powerups: PowerUp[] = [];
     roundNumber: number;
     map: Maze;
+    wallManager: WallManager;
     updateInterval: NodeJS.Timeout | null = null;
     endRoundTimeout: NodeJS.Timeout | null = null;
 
@@ -37,17 +39,12 @@ export class Round {
         this.projectiles = [];
 
         // Generate map with between 10 and 20 nodes in each direction
-        this.map = new Maze(4, 6, 100);
+        const mapSize = Game.getGameByCode(this.gameCode)?.gameSize ?? 1;
+        this.map = new Maze(2 + 2 * mapSize, 3 + 3 * mapSize, 100);
 
-        if (this.players.length > 5) {
-            this.map.removeWalls(Math.random() * 0.6 + 0.35);
-        } else if (this.players.length > 3) {
-            this.map.removeWalls(Math.random() * 0.4 + 0.2);
-        } else if (this.players.length > 2) {
-            this.map.removeWalls(Math.random() * 0.5);
-        } else {
-            this.map.removeWalls(Math.random() * 0.3);
-        }
+        this.map.removeWalls(Math.random() * mapSize * 0.15);
+
+        this.wallManager = new WallManager(this.map);
 
         this.initializePlayers();
     }
@@ -104,14 +101,14 @@ export class Round {
                 Game.getGameByCode(this.gameCode)?.newRound(
                     this.roundNumber + 1
                 );
-            } else if (playersAlive == 1) {
                 if (this.endRoundTimeout === null) {
                     this.endRoundTimeout = setTimeout(() => {
                         Game.getGameByCode(this.gameCode)?.newRound(
                             this.roundNumber + 1
                         );
-                    }, 5000);
+                    }, 500000);
                 }
+            } else if (playersAlive == 1) {
             }
 
             if (Math.random() * 250 < 1) {
@@ -139,6 +136,7 @@ export class Round {
                 if (event.type === 'move') {
                     player.updatePosition(
                         this.map,
+                        this.wallManager,
                         Position.fromCondensed(event.position)
                     );
                     player.bodyAngle = event.bodyAngle;
