@@ -4,7 +4,7 @@ services:
     build:
       context: .
       dockerfile: client/Dockerfile
-    image: tank-trample-client:1.1.0
+    image: tank-trample-client:1.1.1
     ports:
       - "3000:3000"
 
@@ -15,7 +15,7 @@ services:
     build:
       context: .
       dockerfile: server/Dockerfile
-    image: tank-trample-server:1.1.0
+    image: tank-trample-server:1.1.1
     ports:
       - "3001:3001"
 
