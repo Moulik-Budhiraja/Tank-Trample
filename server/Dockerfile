@@ -15,4 +15,4 @@ RUN npx tsc -p .
 
 EXPOSE 3001
 # Start compiled output from dist
-CMD [ "node", "dist/index.js" ]
+CMD [ "node", "index.js" ]
