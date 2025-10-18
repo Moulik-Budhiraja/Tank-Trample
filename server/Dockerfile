@@ -3,15 +3,16 @@ FROM node:16-alpine
 WORKDIR /app
 
 
+# Copy server sources
 COPY ./server .
 
-RUN npm i -g typescript
-
+# Install dependencies (will also install @types/node from package.json)
 RUN npm i
 
-RUN tsc index.ts
+# Build with project tsconfig
+RUN npx tsc -p .
 
 
 EXPOSE 3001
-# Start the app
-CMD [ "node", "index.js" ]
+# Start compiled output from dist
+CMD [ "node", "dist/index.js" ]
